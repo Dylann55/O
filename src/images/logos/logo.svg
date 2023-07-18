@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680.99 341.54">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #c1a01e;
+      }
+
+      .cls-2 {
+        letter-spacing: 0em;
+      }
+
+      .cls-3 {
+        font-family: AcuminConcept-WideBold, 'Acumin Variable Concept';
+        font-variation-settings: 'wght' 700, 'wdth' 115, 'slnt' 0;
+        font-weight: 700;
+      }
+
+      .cls-3, .cls-4 {
+        font-size: 106.91px;
+      }
+
+      .cls-5 {
+        letter-spacing: 0em;
+      }
+
+      .cls-6 {
+        letter-spacing: 0em;
+      }
+
+      .cls-7 {
+        letter-spacing: 0em;
+      }
+
+      .cls-4 {
+        font-family: AcuminConcept-WideExtraLight, 'Acumin Variable Concept';
+        font-variation-settings: 'wght' 200, 'wdth' 115, 'slnt' 0;
+        font-weight: 200;
+      }
+
+      .cls-8 {
+        letter-spacing: 0em;
+      }
+
+      .cls-9 {
+        letter-spacing: 0em;
+      }
+    </style>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer 1">
+    <g>
+      <g>
+        <text class="cls-3" transform="translate(0 313.53)"><tspan class="cls-9" x="0" y="0">O</tspan><tspan class="cls-7" x="90.98" y="0">V</tspan><tspan class="cls-2" x="173.95" y="0">E</tspan><tspan x="252.52" y="0">R</tspan></text>
+        <text class="cls-4" transform="translate(340.05 313.53)"><tspan class="cls-6" x="0" y="0">O</tspan><tspan class="cls-5" x="92.05" y="0">N</tspan><tspan class="cls-8" x="181.53" y="0">C</tspan><tspan x="266.64" y="0">E</tspan></text>
+      </g>
+      <g>
+        <path class="cls-1" d="m413.45,146.81l-79.38,45.83c-1.55.89-3.45.89-5,0l-79.38-45.83c-1.55-.89-2.5-2.54-2.5-4.33V50.83c0-1.79.95-3.44,2.5-4.33L329.08.67c1.55-.89,3.45-.89,5,0l79.38,45.83c1.55.89,2.5,2.54,2.5,4.33v91.65c0,1.79-.95,3.44-2.5,4.33Zm-15.02-14.45V60.94c0-1.79-.95-3.44-2.5-4.33l-61.85-35.71c-1.55-.89-3.45-.89-5,0l-61.85,35.71c-1.55.89-2.5,2.54-2.5,4.33v71.42c0,1.79.95,3.44,2.5,4.33l61.85,35.71c1.55.89,3.45.89,5,0l61.85-35.71c1.55-.89,2.5-2.54,2.5-4.33Z"/>
+        <path class="cls-1" d="m375.27,55.18c-13.74,7.93-27.47,15.86-41.21,23.79-.71.41-1.59.41-2.3,0l-41.35-23.87c-3.85,2.19-7.69,4.38-11.54,6.57l50.24,29.01c2.34,1.35,5.23,1.35,7.58,0l50.24-29.01-11.67-6.49Z"/>
+      </g>
+    </g>
+  </g>
+</svg>
