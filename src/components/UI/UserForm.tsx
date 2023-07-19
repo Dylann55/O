@@ -191,17 +191,15 @@ const UserForm: React.FC<UserFormProps> = ({
           </>)}
         </form>
 
-        {!isLogin && (<>
-          <div className="flex flex-col items-center justify-center gap-2">
-            <div className="flex items-center">
-              <hr className="h-1 w-20 rounded bg-indigo-500" />
-              <span className="mx-4 text-gray-500">o iniciar con</span>
-              <hr className="h-1 w-20 rounded bg-indigo-500" />
-            </div>
-            <SocialButtons />
+        <div className="flex flex-col items-center justify-center gap-2">
+          <div className="flex items-center">
+            <hr className="h-1 w-20 rounded bg-indigo-500" />
+            <span className="mx-4 text-gray-500">o iniciar con</span>
+            <hr className="h-1 w-20 rounded bg-indigo-500" />
           </div>
-        </>)}
-
+          <SocialButtons />
+        </div>
+        
       </div>
     </>
   );

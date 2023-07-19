@@ -17,7 +17,6 @@ import { generateToken } from '../../utils/Jwt';
 import { fetchDataWithConfig } from '../../utils/Fetch';
 import { setSession } from '../../utils/LocalStorage';
 
-
 const FormLogin: React.FC = () => {
   // Variables del Componente Modal
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -88,8 +87,7 @@ const FormLogin: React.FC = () => {
     try {
       const url = process.env.NEXT_PUBLIC_MIDDLE_URL + '/auth/signinWithEmail';
       const data = await fetchDataWithConfig(url, config);
-      console.log({ data })
-
+        
       OptionMessageLogin(data)
 
     } catch (error) {
@@ -107,7 +105,7 @@ const FormLogin: React.FC = () => {
     } else if (data.token) {
       setMessageVerification("Ha Iniciado Sesión Correctamente");
       setSession(data.token);
-      refreshPage();
+      Router.push('/Lobby');
     } else {
       setMessageError("Error Inesperado");
     }
@@ -206,13 +204,8 @@ const FormLogin: React.FC = () => {
   //Si el usuario no cerro la sesion refrescara la pagina
   const CloseSession = () => {
     removeSession();
-    refreshPage();
+    window.location.href = '/';
   }
-
-  //Funcion que refresca la Pagina
-  const refreshPage = () => {
-    window.location.reload();
-  };
 
   return (
     <>

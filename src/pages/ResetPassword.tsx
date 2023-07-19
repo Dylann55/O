@@ -10,7 +10,6 @@ import Alert from '@/components/Widgets/Alert';
 import AlertVerification from '@/components/Widgets/AlertVerification';
 
 import { isPasswordValid } from '@/utils/VerifyUser';
-import { generateToken } from '@/utils/Jwt';
 
 const ResetPassword = () => {
   // Variables del Usuario
@@ -34,18 +33,8 @@ const ResetPassword = () => {
         setMessageError('Contraseña Invalida');
         return;
       }
-
-      const user = {
-        access_token : access_token,
-      };
-      const config = {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${generateToken(user)}`,
-        },
-      };
       
-      console.log(user);
+      await createClient.auth.updateUser({password : password});
 
       setMessageVerification('Contraseña actualizada con éxito');
     } catch (error) {
@@ -53,14 +42,17 @@ const ResetPassword = () => {
     }
   };
 
+
   useEffect(() => {
     createClient.auth.onAuthStateChange(async (event, session) => {
       console.log("El evento es: ", event);
       if (session == null) {
         router.push('/');
       }
-      const access_token = session?.access_token ?? '';
-      setAccessToken(access_token);
+      if (event == "PASSWORD_RECOVERY") {
+        const access_token = session?.access_token ?? '';
+        setAccessToken(access_token);
+      }
     });
   }, []);
 
