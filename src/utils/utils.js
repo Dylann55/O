@@ -1,4 +1,3 @@
-const fetch = require('node-fetch'); // Importa el módulo node-fetch si no está disponible en tu entorno
 
 const fetchData = async (url) => {
   const response = await fetch(url);
@@ -16,6 +15,7 @@ const checkStatus = async (url, config) => {
 };
 
 const jwt = require('jsonwebtoken');
+//npm install jsonwebtoken@8.5.0
 
 const generateToken = (data) => {
   return jwt.sign(data, '3VHHBNWJPXDEenSVW7McpPQYhEaVSgkqmtZ6x9bRRM4VpbL8UrrnZPVRQHEZX');
