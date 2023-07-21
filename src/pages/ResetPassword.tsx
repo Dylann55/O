@@ -1,61 +1,61 @@
-import { useState, FormEvent, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import createClient from '@/db/supabaseClient';
-
-import Modal from '@/components/Widgets/Modal';
+import type { FormEvent } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/Button';
-import ButtonCustomer from '@/components/Widgets/ButtonCustomer';
 import Alert from '@/components/Widgets/Alert';
 import AlertVerification from '@/components/Widgets/AlertVerification';
-
+import ButtonCustomer from '@/components/Widgets/ButtonCustomer';
+import Modal from '@/components/Widgets/Modal';
+import { AuthState, UpdatePassword } from '@/utils/DBFuntion';
 import { isPasswordValid } from '@/utils/VerifyUser';
 
 const ResetPassword = () => {
+  // Inicializo un clase para las funciones de la base de datos
+  const instanciaUpdatePassword = new UpdatePassword();
+  const instanciaAuthState = new AuthState();
+
   // Variables del Usuario
   const router = useRouter();
   const [password, setPassword] = useState('');
-  const [access_token, setAccessToken] = useState<string>('');
 
-  // Variables del Componente Modal
-  const [passwordModalOpen, setPasswordModalOpen] = useState(true);
+  // // Variables del Componente Modal
+  const [passwordModalOpen] = useState(true);
 
   // Variables de Verificacion y error
   const [messageError, setMessageError] = useState<string | null>(null);
-  const [messageVerification, setMessageVerification] = useState<string | null>(null);
+  const [messageVerification, setMessageVerification] = useState<string | null>(
+    null
+  );
 
   const ChangePassword = async (e: FormEvent) => {
     e.preventDefault();
 
     try {
-
       if (!isPasswordValid(password)) {
         setMessageError('Contraseña Invalida');
         return;
       }
-      
-      await createClient.auth.updateUser({password : password});
+
+      const result = await instanciaUpdatePassword.updatePassword(password);
+
+      if (result.error) {
+        setMessageError(
+          'La contraseña nueva tiene que ser distinta a la anterior'
+        );
+        return;
+      }
 
       setMessageVerification('Contraseña actualizada con éxito');
+      router.push('/');
     } catch (error) {
       setMessageError((error as Error).message);
     }
   };
 
-
   useEffect(() => {
-    createClient.auth.onAuthStateChange(async (event, session) => {
-      console.log("El evento es: ", event);
-      if (session == null) {
-        router.push('/');
-      }
-      if (event == "PASSWORD_RECOVERY") {
-        const access_token = session?.access_token ?? '';
-        setAccessToken(access_token);
-      }
-    });
+    instanciaAuthState.startListening();
   }, []);
-
 
   // Funcion que cierra las alarma de verificacion y errores
   const closeAlert = () => {
@@ -63,16 +63,14 @@ const ResetPassword = () => {
     setMessageVerification(null);
   };
 
-  //Funcion que cierra el modal para recuperar contraseña
+  // Funcion que cierra el modal para recuperar contraseña
   const closePasswordModal = (): void => {
     closeAlert();
     router.push('/');
   };
 
-
   return (
     <>
-
       {messageError && (
         <>
           <Alert message={messageError} onClose={closeAlert} />
@@ -81,26 +79,49 @@ const ResetPassword = () => {
 
       {messageVerification && (
         <>
-          <AlertVerification message={messageVerification} onClose={closeAlert} />
+          <AlertVerification
+            message={messageVerification}
+            onClose={closeAlert}
+          />
         </>
       )}
 
       <Modal isOpen={passwordModalOpen}>
-        <div className="items-center mx-auto max-w-screen-sm px-0 py-2 mt-20 sm:mt-5 gap-1">
-
-          <form onSubmit={ChangePassword} className="mb-0 mt-1 space-y-4 rounded-lg p-4 sm:p-6 lg:p-8">
+        <div className="mx-auto mt-20 max-w-screen-sm items-center gap-1 px-0 py-2 sm:mt-5">
+          <form
+            onSubmit={ChangePassword}
+            className="mb-0 mt-1 space-y-4 rounded-lg p-4 sm:p-6 lg:p-8"
+          >
             <div className="mx-auto max-w-lg text-center">
+              <h1 className="text-2xl font-bold sm:text-3xl">
+                Bienvenido a Overonce!
+              </h1>
 
-              <h1 className="text-2xl font-bold sm:text-3xl">Bienvenido a Overonce!</h1>
+              <h2 className="text-center text-lg font-medium">
+                Cambio de Contraseña
+              </h2>
 
-              <h2 className="text-center text-lg font-medium">Cambio de Contraseña</h2>
-
-              <p className="mx-auto mt-4 max-w-md text-center text-gray-500">
+              <p className="mx-auto mt-4 max-w-md text-center text-sm text-gray-500">
+                La contraseña debe cumplir con las siguientes características:
+                <br />
+                - No se permite el uso de contraseñas repetidas.
+                <br />
+                - Debe tener una longitud mínima de 6 caracteres.
+                <br />
+                - Debe contener al menos una letra mayúscula.
+                <br />
+                - Debe contener al menos una letra minúscula.
+                <br />
+                - Debe contener al menos un número.
+                <br />- Debe contener al menos un carácter especial.
               </p>
             </div>
 
-            <div className="relative col-span-6 sm:col-span-3 flex items-center">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <div className="relative col-span-6 flex items-center sm:col-span-3">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
                 <svg x="0px" y="0px" width="15px" height="5px" className="mr-2">
                   <g>
                     <path
@@ -116,7 +137,7 @@ const ResetPassword = () => {
                 id="password"
                 onChange={(e) => setPassword(e.target.value)}
                 value={password}
-                className="w-full rounded-lg border-gray-200 p-4 pe-12 text-sm shadow-sm"
+                className="w-full rounded-lg border-gray-200 p-4 text-sm shadow-sm"
                 placeholder="Enter password"
               />
 
@@ -138,19 +159,21 @@ const ResetPassword = () => {
               </span>
             </div>
 
-            <div className="flex flex-col items-center sm:flex-row sm:justify-center gap-2">
-              <Button onClick={ChangePassword}
-                className="inline-block rounded bg-indigo-600 px-9 sm:px-8 py-3 text-sm font-medium text-white transition hover:scale-110 hover:shadow-xl focus:outline-none focus:ring active:bg-indigo-500">
+            <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-center">
+              <Button
+                onClick={ChangePassword}
+                className="inline-block rounded bg-indigo-600 px-9 py-3 text-sm font-medium text-white transition hover:scale-110 hover:shadow-xl focus:outline-none focus:ring active:bg-indigo-500 sm:px-8"
+              >
                 Cambiar contraseña
               </Button>
-              <ButtonCustomer onClick={closePasswordModal}
-                className="inline-block rounded bg-indigo-600 px-20 py-3 text-sm font-medium text-white transition hover:scale-110 hover:shadow-xl focus:outline-none focus:ring active:bg-indigo-500">
+              <ButtonCustomer
+                onClick={closePasswordModal}
+                className="inline-block rounded bg-indigo-600 px-20 py-3 text-sm font-medium text-white transition hover:scale-110 hover:shadow-xl focus:outline-none focus:ring active:bg-indigo-500"
+              >
                 Volver
               </ButtonCustomer>
             </div>
-
           </form>
-
         </div>
       </Modal>
     </>

@@ -19,13 +19,15 @@ const Alert: React.FC<AlertProps> = ({ message, onClose }) => {
   };
 
   return (
-    <div className="z-50 fixed inset-0 flex items-center justify-center" onClick={handleContainerClick}>
-      <div role="alert"
-        className="fixed top-0 right-0 p-4 m-4 rounded border-s-4 border-red-500 bg-red-50 p-4
-      transition-transform duration-300 transform hover:scale-110 hover:shadow-xl focus:outline-none focus:ring 
-      active:bg-primary"
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      onClick={handleContainerClick}
+    >
+      <div
+        role="alert"
+        className="fixed top-0 right-0 m-4 rounded border-red-500 bg-red-50 p-4
+      transition-transform duration-300 hover:scale-110 hover:shadow-xl focus:outline-none focus:ring"
       >
-
         <div className="flex items-center gap-2 text-red-800">
           <svg
             xmlns="http://www.w3.org/2000/svg"

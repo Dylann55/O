@@ -1,34 +1,19 @@
-import { verifyToken } from './Jwt';
-import createClient from '@/db/supabaseClient';
+// eslint-disable-next-line import/no-cycle
+import { SignOut } from '@/utils/DBFuntion';
+import { verifyToken } from '@/utils/Jwt';
 
 export const setSession = (decoded: any): void => {
   const token = verifyToken(decoded);
-  localStorage.setItem('sesion', decoded);
-  localStorage.setItem('email', token.email);
+  localStorage.setItem('sesion', token.access_token);
 };
 
 export const removeSession = async (): Promise<void> => {
   localStorage.removeItem('sesion');
   localStorage.removeItem('email');
-  await createClient.auth.signOut();
+  // Inicializo un clase para las funciones de la base de datos
+  const instanciaSignOut = new SignOut();
+  await instanciaSignOut.signOut();
 };
-
-export const checkSessionSocial = (): void => {
-  if (!checkSession()) {
-    createClient.auth.onAuthStateChange(async (event, session) => {
-      if (event === "SIGNED_IN") {
-        const access_token = session?.access_token;
-        const email = session?.user?.email;
-
-        if (access_token && email) {
-          localStorage.setItem('sesion', access_token);
-          localStorage.setItem('email', email);
-        }
-        window.location.reload();
-      }
-    });
-  }
-}
 
 export const checkSession = (): boolean => {
   const session = localStorage.getItem('sesion');

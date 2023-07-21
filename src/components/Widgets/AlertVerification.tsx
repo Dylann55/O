@@ -5,7 +5,10 @@ type AlertVerificationProps = {
   onClose: () => void;
 };
 
-const AlertVerification: React.FC<AlertVerificationProps> = ({ message, onClose }) => {
+const AlertVerification: React.FC<AlertVerificationProps> = ({
+  message,
+  onClose,
+}) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
@@ -19,11 +22,14 @@ const AlertVerification: React.FC<AlertVerificationProps> = ({ message, onClose 
   };
 
   return (
-    <div className="z-50 fixed inset-0 flex items-center justify-center" onClick={handleContainerClick}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      onClick={handleContainerClick}
+    >
       <div
         role="alert"
-        className="fixed top-0 right-0 p-4 m-4 rounded-xl border border-gray-100 bg-white
-        bg-primary-lightest transition-transform duration-300 transform hover:scale-110 hover:shadow-xl focus:outline-none focus:ring"
+        className="fixed top-0 right-0 m-4 rounded-xl border border-gray-100 bg-white
+        p-4 transition-transform duration-300 hover:scale-110 hover:shadow-xl focus:outline-none focus:ring"
       >
         <div className="flex items-start gap-4">
           <span className="text-green-600">
@@ -44,7 +50,10 @@ const AlertVerification: React.FC<AlertVerificationProps> = ({ message, onClose 
           </span>
 
           <div className="flex-1">
-            <strong className="block font-medium text-gray-900"> Mensaje de Verificacion </strong>
+            <strong className="block font-medium text-gray-900">
+              {' '}
+              Mensaje de Verificacion{' '}
+            </strong>
 
             <p className="mt-1 text-sm text-gray-700">{message}</p>
           </div>

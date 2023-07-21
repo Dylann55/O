@@ -1,5 +1,5 @@
-import React from 'react';
 import clsx from 'clsx';
+import React from 'react';
 
 type ButtonCircleProps = {
   onClick: () => void;
@@ -7,14 +7,13 @@ type ButtonCircleProps = {
   className?: string;
 };
 
-const ButtonCustomer: React.FC<ButtonCircleProps> = ({ onClick, children, className }) => {
-  
+const ButtonCustomer: React.FC<ButtonCircleProps> = ({
+  onClick,
+  children,
+  className,
+}) => {
   return (
-    <button
-      type="button"
-      className={clsx(className)}
-      onClick={onClick}
-    >
+    <button type="button" className={clsx(className)} onClick={onClick}>
       {children}
     </button>
   );

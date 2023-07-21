@@ -1,7 +1,8 @@
-import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react';
+import type { ChangeEvent, FormEvent } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import ButtonCustomer from '../Widgets/ButtonCustomer';
 import Button from '../Widgets/Button';
+import ButtonCustomer from '../Widgets/ButtonCustomer';
 import SocialButtons from './FormIcons';
 
 type UserFormProps = {
@@ -33,8 +34,7 @@ const UserForm: React.FC<UserFormProps> = ({
   submitButtonModal,
   openModalPassword,
 }) => {
-
-  //Variables para el NextAuth
+  // Variables para el NextAuth
   const [isLogin, setIsLogin] = useState(false);
 
   const handleEmailChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -63,26 +63,47 @@ const UserForm: React.FC<UserFormProps> = ({
   };
 
   useEffect(() => {
-    if (submitButtonModal != "Registrarse")
-      setIsLogin(true);
+    if (submitButtonModal !== 'Registrarse') setIsLogin(true);
   }, []);
 
   return (
     <>
-      <div className="items-center mx-auto max-w-screen-sm px-8 sm:px-4 py-2 mt-20 sm:mt-2">
-
-        <form onSubmit={handleSubmit} className="mb-0 mt-1 space-y-2 rounded-lg p-4 sm:p-6 lg:p-8">
-
+      <div className="mx-auto mt-0 max-w-screen-sm items-center px-4 py-2 md:mt-2 md:px-8">
+        <form
+          onSubmit={handleSubmit}
+          className="mb-0 space-y-2 rounded-lg p-4 sm:p-6 lg:p-8"
+        >
           <div className="mx-auto max-w-lg text-center">
-            <h1 className="text-2xl font-bold sm:text-3xl">Bienvenido a Overonce!</h1>
+            <h1 className="text-2xl font-bold sm:text-3xl">
+              Bienvenido a Overonce!
+            </h1>
             <h2 className="text-center text-lg font-medium">{labelText}</h2>
-            <p className="mx-auto mt-4 max-w-md text-center text-gray-500">
 
-            </p>
+            {isLogin && (
+              <>
+                <p className="mx-auto mt-4 max-w-md text-center text-sm text-gray-500">
+                  La contraseña debe cumplir con las siguientes características:
+                  <br />
+                  - Debe tener una longitud mínima de 6 caracteres.
+                  <br />
+                  - Debe contener al menos una letra mayúscula.
+                  <br />
+                  - Debe contener al menos una letra minúscula.
+                  <br />
+                  - Debe contener al menos un número.
+                  <br />- Debe contener al menos un carácter especial.
+                </p>
+              </>
+            )}
+
+            <p className="mx-auto mt-4 max-w-md text-center text-gray-500"></p>
           </div>
 
-          <div className="relative col-span-6 sm:col-span-3 flex items-center">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+          <div className="relative col-span-6 flex items-center sm:col-span-3">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700"
+            >
               <svg x="0px" y="0px" width="12px" height="13px" className="mr-2">
                 <path
                   fill="#B1B7C4"
@@ -96,7 +117,7 @@ const UserForm: React.FC<UserFormProps> = ({
               id="email"
               onChange={handleEmailChange}
               value={email}
-              className="w-full rounded-lg border-gray-200 p-4 pe-12 text-sm shadow-sm"
+              className="w-full rounded-lg border-gray-200 p-4 text-sm shadow-sm"
               placeholder="Enter email"
             />
 
@@ -118,8 +139,11 @@ const UserForm: React.FC<UserFormProps> = ({
             </span>
           </div>
 
-          <div className="relative col-span-6 sm:col-span-3 flex items-center">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+          <div className="relative col-span-6 flex items-center sm:col-span-3">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700"
+            >
               <svg x="0px" y="0px" width="15px" height="5px" className="mr-2">
                 <g>
                   <path
@@ -135,7 +159,7 @@ const UserForm: React.FC<UserFormProps> = ({
               id="password"
               onChange={handlePasswordChange}
               value={password}
-              className="w-full rounded-lg border-gray-200 p-4 pe-12 text-sm shadow-sm"
+              className="w-full rounded-lg border-gray-200 p-4 text-sm shadow-sm"
               placeholder="Enter password"
             />
 
@@ -158,37 +182,44 @@ const UserForm: React.FC<UserFormProps> = ({
           </div>
 
           <div className="flex flex-col items-center justify-center gap-2">
-            <div className="flex flex-col items-center sm:flex-row sm:justify-center gap-2">
-              <Button onClick={handleSubmit}
-                className="inline-block rounded bg-indigo-600 px-16 sm:px-8 py-3 text-sm font-medium text-white transition hover:scale-110 hover:shadow-xl focus:outline-none focus:ring active:bg-indigo-500">
+            <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-center">
+              <Button
+                onClick={handleSubmit}
+                className="inline-block rounded bg-indigo-600 px-16 py-3 text-sm font-medium text-white transition hover:scale-110 hover:shadow-xl focus:outline-none focus:ring active:bg-indigo-500 sm:px-8"
+              >
                 {submitButtonLabel}
               </Button>
-              <ButtonCustomer onClick={handleCancel}
-                className="inline-block rounded bg-red-600 px-20 sm:px-12 py-3 text-sm font-medium text-white transition hover:scale-110 hover:shadow-xl focus:outline-none focus:ring active:bg-red-500">
+              <ButtonCustomer
+                onClick={handleCancel}
+                className="inline-block rounded bg-red-600 px-20 py-3 text-sm font-medium text-white transition hover:scale-110 hover:shadow-xl focus:outline-none focus:ring active:bg-red-500 sm:px-12"
+              >
                 Cancelar
               </ButtonCustomer>
             </div>
 
             <p className="text-center text-sm text-gray-500">
               <span className="mr-1">{textModal}</span>
-              <ButtonCustomer onClick={handleModal}
-                className="hover:text-indigo-500 hover:font-semibold">
+              <ButtonCustomer
+                onClick={handleModal}
+                className="hover:font-semibold hover:text-indigo-500"
+              >
                 {submitButtonModal}
               </ButtonCustomer>
             </p>
-
           </div>
 
-          {!isLogin && (<>
-
-            <p className="text-center text-sm text-gray-500">
-              <ButtonCustomer onClick={handleModalPassword}
-                className="hover:text-indigo-500 hover:font-semibold">
-                Olvidaste la Contraseña?
-              </ButtonCustomer>
-            </p>
-
-          </>)}
+          {!isLogin && (
+            <>
+              <p className="text-center text-sm text-gray-500">
+                <ButtonCustomer
+                  onClick={handleModalPassword}
+                  className="hover:font-semibold hover:text-indigo-500"
+                >
+                  Olvidaste la Contraseña?
+                </ButtonCustomer>
+              </p>
+            </>
+          )}
         </form>
 
         <div className="flex flex-col items-center justify-center gap-2">
@@ -199,7 +230,6 @@ const UserForm: React.FC<UserFormProps> = ({
           </div>
           <SocialButtons />
         </div>
-        
       </div>
     </>
   );

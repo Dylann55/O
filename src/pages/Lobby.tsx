@@ -1,20 +1,22 @@
 import Head from 'next/head';
-import { Header } from '@/components/Header';
-import { useEffect } from 'react';
 import Router from 'next/router';
+import { useEffect } from 'react';
 
-import { checkSession, checkSessionSocial } from '@/utils/LocalStorage';
+import { Header } from '@/components/Header';
+import { AuthStateSocial } from '@/utils/DBFuntion';
+import { checkSession } from '@/utils/LocalStorage';
 
 export default function Lobby() {
+  // Inicializo un clase para las funciones de la base de datos
+  const instanciaAuthStateSocial = new AuthStateSocial();
 
   useEffect(() => {
-    checkSessionSocial();
+    instanciaAuthStateSocial.checkSessionSocial();
 
-    if(!checkSession()){
+    if (!checkSession()) {
       Router.push('/');
     }
   }, []);
-
 
   return (
     <>
@@ -26,9 +28,7 @@ export default function Lobby() {
         />
       </Head>
       <Header />
-      <main>
-
-      </main>
+      <main></main>
     </>
   );
 }

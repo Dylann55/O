@@ -1,3 +1,5 @@
+/* eslint-disable import/no-unresolved */
+import { sign, verify } from 'jsonwebtoken';
 
 const fetchData = async (url) => {
   const response = await fetch(url);
@@ -13,19 +15,18 @@ const checkStatus = async (url, config) => {
   const response = await fetch(url, config);
   return response.ok;
 };
+// npm install jsonwebtoken@8.5.0
 
-const jwt = require('jsonwebtoken');
-//npm install jsonwebtoken@8.5.0
+const secretToken =
+  '3VHHBNWJPXDEenSVW7McpPQYhEaVSgkqmtZ6x9bRRM4VpbL8UrrnZPVRQHEZX';
 
 const generateToken = (data) => {
-  return jwt.sign(data, '3VHHBNWJPXDEenSVW7McpPQYhEaVSgkqmtZ6x9bRRM4VpbL8UrrnZPVRQHEZX');
+  return sign(data, secretToken);
 };
 
 const verifyToken = (data) => {
-  return jwt.verify(data, '3VHHBNWJPXDEenSVW7McpPQYhEaVSgkqmtZ6x9bRRM4VpbL8UrrnZPVRQHEZX');
+  return verify(data, secretToken);
 };
-
-const Router = require('next/router');
 
 const setSession = (decoded) => {
   const token = verifyToken(decoded);
@@ -36,24 +37,8 @@ const setSession = (decoded) => {
 const removeSession = async () => {
   localStorage.removeItem('sesion');
   localStorage.removeItem('email');
+  // eslint-disable-next-line no-undef
   await createClient.auth.signOut();
-};
-
-const checkSessionSocial = () => {
-  if (!checkSession()) {
-    createClient.auth.onAuthStateChange(async (event, session) => {
-      if (event === "SIGNED_IN") {
-        const access_token = session?.access_token;
-        const email = session?.user?.email;
-
-        if (access_token && email) {
-          localStorage.setItem('sesion', access_token);
-          localStorage.setItem('email', email);
-        }
-        window.location.reload();
-      }
-    });
-  }
 };
 
 const checkSession = () => {
@@ -80,7 +65,8 @@ const isPasswordValid = (password) => {
   );
 };
 
-module.exports = {
+// eslint-disable-next-line import/no-anonymous-default-export
+export default {
   fetchData,
   fetchDataWithConfig,
   checkStatus,

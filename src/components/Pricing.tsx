@@ -119,28 +119,23 @@ export function Pricing() {
         <div className="md:text-center">
           <h2 className="text-3xl tracking-tight text-white sm:text-4xl">
             <span className="relative whitespace-nowrap">
-              <SwirlyDoodle className="absolute top-1/2 left-0 h-[1em] w-full fill-blue-400" />
-              <span className="relative">Simple pricing,</span>
-            </span>{' '}
-            for everyone.
+              <span className="relative">Conoce todos nuestros planes</span>
+            </span>
           </h2>
           <p className="mt-4 text-lg text-slate-400">
-            It doesn’t matter what size your business is, our software won’t
-            work well for you.
+            contamos con planes para todo tamaño de negocios, solo suscribete al
+            plan adecuado mejora tu productividad
           </p>
         </div>
         <div className="-mx-4 mt-16 grid max-w-2xl grid-cols-1 gap-y-10 sm:mx-auto lg:-mx-8 lg:max-w-none lg:grid-cols-3 xl:mx-0 xl:gap-x-8">
           <Plan
-            name="Starter"
-            price="$9"
-            description="Good for anyone who is self-employed and just getting started."
+            name="Gratis"
+            price="$0"
+            description="Para pequeños negocios o pruebas de producto antes de adquirir tu plan pagado."
             href="/register"
             features={[
-              'Send 10 quotes and invoices',
-              'Connect up to 2 bank accounts',
-              'Track up to 15 expenses per month',
-              'Manual payroll support',
-              'Export up to 3 reports',
+              'Controla una organización con hasta 3 vehiculos',
+              'Agrega hasta 3 miembros de tu organización',
             ]}
           />
           <Plan

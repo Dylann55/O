@@ -7,17 +7,17 @@ type ModalProps = {
   children: React.ReactNode;
 };
 
-const Modal: React.FC<ModalProps> = ({ isOpen, children }) => {
+const ModalCRUD: React.FC<ModalProps> = ({ isOpen, children }) => {
   if (!isOpen) {
     return null;
   }
 
   return (
     <div
-      className={`${styles.modalOverlay} ${styles.backgroundOverlay} md:${styles.modalOverlay}`}
+      className={`${styles.modalOverlay} md:${styles.modalOverlay}`}
     >
       <div
-        className={`${styles.modalContent} translate-y-1/4 md:translate-y-0`}
+        className={`${styles.modalContent}`}
       >
         {children}
       </div>
@@ -25,4 +25,4 @@ const Modal: React.FC<ModalProps> = ({ isOpen, children }) => {
   );
 };
 
-export default Modal;
+export default ModalCRUD;
