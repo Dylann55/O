@@ -74,7 +74,7 @@ class SupaBaseAuthStateSocial extends AuthStateSocial {
           const email = session?.user?.email;
 
           if (access_token && email && id) {
-            localStorage.setItem('sesion', access_token);
+            localStorage.setItem('access_token', access_token);
             localStorage.setItem('email', email);
             localStorage.setItem('id', id);
             const url = `${process.env.NEXT_PUBLIC_MIDDLE_URL}/auth/saveUser`;

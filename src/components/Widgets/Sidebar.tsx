@@ -1,6 +1,13 @@
 // components/Sidebar.tsx
 import React from 'react';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/router';
+
+import { AuthStateSocial } from '@/utils/DBFuntion';
+import { checkSession, removeSession } from '@/utils/LocalStorage';
+import Link from 'next/link';
+
 const navigationUser = [
     {
         id: 1,
@@ -45,7 +52,7 @@ const navigationUser = [
                 />
             </svg>
         ),
-        spanClassName: "translate-x-20",
+        spanClassName: "translate-x-24",
     },
 ];
 
@@ -134,12 +141,31 @@ const navigation = [
 
 
 const Sidebar: React.FC = () => {
+
+    // Inicializo un clase para las funciones de la base de datos
+    const instanciaAuthStateSocial = new AuthStateSocial();
+    const router = useRouter();
+
+    useEffect(() => {
+        instanciaAuthStateSocial.checkSessionSocial();
+
+        if (!checkSession()) {
+            router.push('/');
+        }
+    }, []);
+
+    // Si el usuario no cerro la sesion refrescara la pagina
+    const CloseSession = async () => {
+        await removeSession();
+    };
+    
+
     return (
-        <div className="fixed top-0 left-0 h-full w-16 bg-white border-e flex flex-col justify-between"
+        <div className="fixed top-0 left-0 h-full w-16 bg-neutral-900 border-e flex flex-col justify-between"
             style={{ zIndex: 9999 }}>
             <div>
                 <div className="inline-flex h-16 w-16 items-center justify-center">
-                    <span className="grid h-10 w-10 place-content-center rounded-lg bg-gray-100 text-xs text-gray-600">
+                    <span className="grid h-10 w-10 place-content-center rounded-lg bg-gray-900 text-xs text-gray-300">
                         O
                     </span>
                 </div>
@@ -148,33 +174,35 @@ const Sidebar: React.FC = () => {
                     <div className="px-2">
                         <div className="space-y-1 py-4">
                             {navigationUser.map((item) => (
-                                <a
+                                <Link
                                     key={item.id}
                                     href={item.url}
-                                    className="t group relative flex justify-center rounded bg-blue-50 px-2 py-1.5 text-blue-700"
+                                    className="t group relative flex justify-center rounded bg-gray-900 px-2 py-1.5 text-gray-400 hover:text-white"
                                 >
                                     {item.icon}
 
-                                    <span className={`${item.spanClassName} absolute start-full top-1/2 -translate-y-1/2  rounded bg-gray-900 px-2 py-1.5 text-xs font-medium text-white opacity-0 group-hover:opacity-100`}>
+                                    <span style={{ pointerEvents: "none" }}
+                                        className={`${item.spanClassName} absolute start-full top-1/2 -translate-y-1/2  rounded bg-gray-900 px-2 py-1.5 text-xs font-medium text-white opacity-0 group-hover:opacity-100`}>
                                         {item.label}
                                     </span>
-                                </a>
+                                </Link>
                             ))}
                         </div>
 
                         <ul className="space-y-1 border-t border-gray-100 pt-4">
                             {navigation.map((item) => (
                                 <li key={item.id}>
-                                    <a
+                                    <Link
                                         href={item.url}
-                                        className="group relative flex justify-center rounded px-2 py-1.5 text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                                        className="group relative flex justify-center rounded px-2 py-1.5 text-gray-400 hover:bg-gray-800 hover:text-white"
                                     >
                                         {item.icon}
 
-                                        <span className={`${item.spanClassName} absolute start-full top-1/2 -translate-y-1/2 translate-x-16 rounded bg-gray-900 px-2 py-1.5 text-xs font-medium text-white opacity-0 group-hover:opacity-100`}>
+                                        <span style={{ pointerEvents: "none" }}
+                                            className={`${item.spanClassName} absolute start-full top-1/2 -translate-y-1/2 translate-x-16 rounded bg-gray-900 px-2 py-1.5 text-xs font-medium text-white opacity-0 group-hover:opacity-100`}>
                                             {item.label}
                                         </span>
-                                    </a>
+                                    </Link>
                                 </li>
                             ))}
                         </ul>
@@ -183,11 +211,11 @@ const Sidebar: React.FC = () => {
                 </div>
             </div>
 
-            <div className="sticky inset-x-0 bottom-0 border-t border-gray-100 bg-white p-2">
-                <form action="/logout">
+            <div className="sticky inset-x-0 bottom-0 border-t border-gray-100 bg-zinc-900 p-2">
+                <form onSubmit={CloseSession}>
                     <button
                         type="submit"
-                        className="group relative flex w-full justify-center rounded-lg px-2 py-1.5 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                        className="group relative flex w-full justify-center rounded-lg px-2 py-1.5 text-sm text-gray-100 hover:bg-gray-800 hover:text-white"
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -205,7 +233,7 @@ const Sidebar: React.FC = () => {
                         </svg>
 
                         <span className="absolute start-full top-1/2 -translate-y-1/2 translate-x-16 rounded bg-gray-900 px-2 py-1.5 text-xs font-medium text-white opacity-0 group-hover:opacity-100">
-                            Logout
+                            Cerrar Sesion
                         </span>
 
                     </button>

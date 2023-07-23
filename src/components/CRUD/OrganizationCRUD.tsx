@@ -1,36 +1,30 @@
 import React, { useState, useEffect } from 'react';
 
-import { BsPersonFill } from 'react-icons/bs';
 import ModalCRUD from '../Widgets/ModalCRUD';
 import Alert from '../Widgets/Alert';
 import AlertVerification from '../Widgets/AlertVerification';
 
-import { generateToken } from '@/utils/Jwt';
-import { fetchDataWithConfig } from '@/utils/Fetch';
-import { CreateRequest, DeleteRequest, ReadRequestS, UpdateRequest } from '@/utils/CRUD';
+import { CreateRequest, DeleteRequest, ReadRequest, ReadRequestS, UpdateRequest } from '@/utils/CRUD';
 import CustomButton from '../Widgets/VerticalMenu/Button/CustomButton';
+import { getSession } from '@/utils/LocalStorage';
 
 interface Item {
-  id: number;
+  organizationID: number;
   name: string;
-  email: string;
-  lastname: string;
 }
 
 const ITEMS_PER_PAGE = 30; // Numero de elementos a mostrar por pagina
-const url_item = process.env.NEXT_PUBLIC_MIDDLE_URL;
+const url_item = process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage';
 
-const UserCRUD: React.FC = () => {
+const OrganizationCRUD: React.FC = () => {
 
-  const [itemName] = useState<string>('Usuario');
+  const [itemName] = useState<string>('Organizacion');
 
   const [items, setItems] = useState<Item[]>([]);
   const [selectedItems, setSelectedItems] = useState<Item[]>([]);
   const [newItem, setNewItem] = useState<Item>({
-    id: 0,
+    organizationID: 0,
     name: '',
-    email: '',
-    lastname: ''
   });
 
   const [updateId, setUpdateId] = useState<number | null>(null);
@@ -43,38 +37,51 @@ const UserCRUD: React.FC = () => {
 
   const fetchItems = async () => {
     try {
-      //const url = url_item + ``
+      const url = url_item + `/listMycompanies`;
+      if (access_token) {
 
-      const response = await ReadRequestS("user");
-      if (response && response.data) {
-        setItems(response.data);
+        const config = {
+          access_token: access_token,
+        }
+
+        //const response = await ReadRequestS("organization");
+
+        const response = await ReadRequest(url,config);
+
+        console.log(response);
+
+        if (response && response.data) {
+          setItems(response.data);
+          clearCheckbox();
+        }
+        else {
+          setMessageError(response.error);
+        }
       }
       else {
-        setMessageError(response.error.message);
+        setMessageError("Expiro la Session")
       }
 
     } catch (error) {
-      setMessageError('Error fetching data:' + (error as Error).message);
+      setMessageError(`Error seaching ${itemName}:` + (error as Error).message);
     }
   };
 
   const handleCreate = async () => {
     try {
-      const url = url_item + ``
+      const url = url_item + `/createCompany`;
 
-      const response = await CreateRequest(url, newItem);
-
-      // Actualizar el estado de items con los nuevos datos
-      if (response && response.data) {
-        fetchItems();
+      if (access_token) {
+        const Item = { ...newItem, access_token: access_token };
+        const response = await CreateRequest(url, Item);
+        OptionMessage(response);
       }
       else {
-        setMessageError(response.error.message);
+        setMessageError("Expiro la Session")
       }
 
-      ClearItem();
     } catch (error) {
-      setMessageError('Error creating item:' + (error as Error).message);
+      setMessageError(`Error creating ${itemName}:` + (error as Error).message);
     }
   };
 
@@ -83,48 +90,47 @@ const UserCRUD: React.FC = () => {
 
     try {
 
-      console.log(newItem);
-      const url = url_item + `/${updateId}`
+      const url = url_item + `/renameCompany`;
+      if (access_token) {
 
-      const response = await UpdateRequest(url, newItem);
+        const config = {
+          organizationID: updateId,
+          name: newItem.name,
+          access_token: access_token,
+        }
 
-      // Actualizar el estado de items con los nuevos datos
-      if (response && response.data) {
-        fetchItems();
+        const response = await UpdateRequest(url, config);
+        OptionMessageUD(response);
       }
+
       else {
-        setMessageError(response.error.message);
+        setMessageError("Expiro la Session")
       }
-
-      ClearItem();
     } catch (error) {
-      setMessageError('Error updating item:' + (error as Error).message);
+      setMessageError(`Error updating ${itemName}:` + (error as Error).message);
     }
   };
 
   const handleDeleteSelected = async () => {
     try {
-      const idsToDelete = selectedItems.map(item => item.id);
+      const url = url_item + `/deleteCompany`;
+      if (access_token) {
+        const idsToDelete = selectedItems.map(item => item.organizationID);
+        for (const idToDelete of idsToDelete) {
+          const config = {
+            access_token: access_token,
+            organizationID: idToDelete,
+          }
 
-      console.log(idsToDelete);
-
-      const url = url_item + ``
-
-      const response = await DeleteRequest(url, newItem);
-
-      // Actualizar el estado de items con los nuevos datos
-      if (response && response.data) {
-        fetchItems();
+          const response = await DeleteRequest(url, config);
+          OptionMessageUD(response);
+        }
       }
       else {
-        setMessageError(response.error.message);
+        setMessageError("Expiro la Session")
       }
-
-      const updatedItems = items.filter(item => !idsToDelete.includes(item.id));
-      setItems(updatedItems);
-      setSelectedItems([]);
     } catch (error) {
-      setMessageError('Error deleting items:' + (error as Error).message);
+      setMessageError(`Error deleting ${itemName}:` + (error as Error).message);
     }
   };
 
@@ -138,24 +144,25 @@ const UserCRUD: React.FC = () => {
   };
 
   const handleEdit = (item: Item) => {
-    setUpdateId(item.id);
+    setUpdateId(item.organizationID);
     setNewItem({
-      id: item.id,
+      organizationID: item.organizationID,
       name: item.name,
-      email: item.email,
-      lastname: item.lastname,
     });
     openLoginModal();
   };
 
-  const ClearItem = () => {
+  const clearItem = () => {
     setUpdateId(null);
     setNewItem({
-      id: 0,
+      organizationID: 0,
       name: '',
-      email: '',
-      lastname: '',
     });
+  }
+
+  const clearCheckbox = () => {
+    setSelectedItems([]);
+    setSelectAll(false);
   }
 
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>, item: Item) => {
@@ -163,7 +170,7 @@ const UserCRUD: React.FC = () => {
       setSelectedItems(prevSelectedItems => [...prevSelectedItems, item]);
     } else {
       setSelectedItems(prevSelectedItems =>
-        prevSelectedItems.filter(selectedItem => selectedItem.id !== item.id)
+        prevSelectedItems.filter(selectedItem => selectedItem.organizationID !== item.organizationID)
       );
     }
   };
@@ -173,10 +180,43 @@ const UserCRUD: React.FC = () => {
     setSelectedItems(event.target.checked ? items : []);
   };
 
+  const OptionMessage = (data: any): void => {
+    if (data.error) {
+      setMessageError(data.error);
+    } else if (data.message) {
+      setMessageError(data.message);
+    } else if (data) {
+      setMessageVerification(data);
+      fetchItems();
+      closeModal();
+    } else {
+      setMessageError('Error Inesperado');
+    }
+  };
+
+  const OptionMessageUD = (data: any): void => {
+    if (data.error) {
+      setMessageError(data.error);
+    }
+    else if (data.message) {
+      if (data.message == "El nombre se actualizo exitosamente" || data.message == "Se eliminó la empresa") {
+        setMessageVerification(data.message);
+        fetchItems();
+        closeModal();
+      }
+      setMessageError(data.message);
+    } else if (data) {
+      setMessageError(data);
+    } else {
+      setMessageError('Error Inesperado');
+    }
+  };
+
   // -------------------------------Funciones para la Paginacion-------------------------------
   const getCurrentPageItems = () => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
+
     return items.slice(startIndex, endIndex);
   };
 
@@ -189,30 +229,18 @@ const UserCRUD: React.FC = () => {
   };
 
   // -------------------------------Funciones de Extra-------------------------------
-  const changePassword = async (email: string) => {
-    const user = {
-      email,
-    };
 
-    const config = {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${generateToken(user)}`,
-      },
-    };
-    try {
-      const url = `${process.env.NEXT_PUBLIC_MIDDLE_URL}/auth/recoverPassword`;
-      const data = await fetchDataWithConfig(url, config);
-      if (data.message === 'Correo de restablecimiento de contraseña enviado') {
-        setMessageVerification(data.message);
-      }
-      setMessageError(data.message);
-    } catch (error) {
-      setMessageError((error as Error).message);
-    }
-  }
+  const [access_token, setAccessToken] = useState('');
 
   useEffect(() => {
+
+    const obtenerTokenDeAcceso = async () => {
+      const token = await getSession();
+      setAccessToken(token);
+    };
+
+    obtenerTokenDeAcceso();
+
     fetchItems();
   }, [currentPage]);
 
@@ -240,26 +268,27 @@ const UserCRUD: React.FC = () => {
   // Funcion que cierra el modal para loguearse
   const closeModal = () => {
     setModalOpen(false);
-
-    ClearItem();
-
-    closeAlert();
+    clearItem();
   };
 
   return (
     <div>
 
-      {messageError && (
-        <>
-          <Alert message={messageError} onClose={closeAlert} />
-        </>
-      )}
+      <div className="space-y-4">
 
-      {messageVerification && (
-        <>
-          <AlertVerification message={messageVerification} onClose={closeAlert} />
-        </>
-      )}
+        {messageError && (
+          <>
+            <Alert message={messageError} onClose={closeAlert} />
+          </>
+        )}
+
+        {messageVerification && (
+          <>
+            <AlertVerification message={messageVerification} onClose={closeAlert} />
+          </>
+        )}
+
+      </div>
 
       <ModalCRUD isOpen={ModalOpen}>
         <div className="mx-auto mt-10 max-w-screen items-center px-6 sm:px-8">
@@ -278,33 +307,6 @@ const UserCRUD: React.FC = () => {
             </div>
 
             <div>
-              <div className="relative flex items-center">
-                <input
-                  type="text"
-                  id="email"
-                  value={newItem.email || ''}
-                  onChange={(e) => setNewItem({ ...newItem, email: e.target.value })}
-                  className="w-full rounded-lg border-gray-200 p-4 text-sm shadow-sm"
-                  placeholder="Ingresar Email"
-                />
-
-                <span className="absolute inset-y-0 right-0 flex items-center pr-4">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4 text-gray-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
-                    />
-                  </svg>
-                </span>
-              </div>
 
               <div className="relative flex items-center">
                 <input
@@ -334,33 +336,6 @@ const UserCRUD: React.FC = () => {
                 </span>
               </div>
 
-              <div className="relative flex items-center">
-                <input
-                  type="text"
-                  id="lastname"
-                  value={newItem.lastname || ''}
-                  onChange={(e) => setNewItem({ ...newItem, lastname: e.target.value })}
-                  className="w-full rounded-lg border-gray-200 p-4 text-sm shadow-sm"
-                  placeholder="Ingresar Apellido"
-                />
-
-                <span className="absolute inset-y-0 right-0 flex items-center pr-4">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4 text-gray-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
-                    />
-                  </svg>
-                </span>
-              </div>
             </div>
 
             <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-center">
@@ -450,19 +425,15 @@ const UserCRUD: React.FC = () => {
                 </th>
 
                 <th className="text-start whitespace-nowrap px-4 py-2 font-medium text-gray-900">
-                  Nombre Completo
+                  ID de la {itemName}
                 </th>
 
                 <th className="text-start whitespace-nowrap px-4 py-2 font-medium text-gray-900">
-                  Email
+                  Nombre de la {itemName}
                 </th>
 
                 <th className="text-start whitespace-nowrap px-4 py-2 font-medium text-gray-900">
                   Metodos
-                </th>
-
-                <th className="text-start whitespace-nowrap px-4 py-2 font-medium text-gray-900">
-                  Accion
                 </th>
 
               </tr>
@@ -470,7 +441,8 @@ const UserCRUD: React.FC = () => {
 
             <tbody className="divide-y divide-gray-200">
               {getCurrentPageItems().map(item => (
-                <tr key={item.id} className=''>
+
+                <tr key={item.organization.organizationID}>
 
                   <td className="px-4 py-2">
                     <div className='h-5 w-5 rounded border-gray-300'>
@@ -482,17 +454,12 @@ const UserCRUD: React.FC = () => {
                     </div>
                   </td>
 
-                  <td className="whitespace-nowrap px-4 py-2 font-medium">
-                    <div className='flex items-center'>
-                      <div className='bg-indigo-100 p-3 rounded-lg'>
-                        <BsPersonFill className='text-indigo-500' />
-                      </div>
-                      <p className='text-gray-600 pl-4'>{item.name + ' ' + item.lastname}</p>
-                    </div>
+                  <td className="text-gray-600 whitespace-nowrap px-4 py-2 font-medium">
+                    {item.organizationID}
                   </td>
 
                   <td className="text-gray-600 whitespace-nowrap px-4 py-2 font-medium">
-                    {item.email}
+                    {item.name}
                   </td>
 
                   <td className="px-4 py-2">
@@ -520,26 +487,6 @@ const UserCRUD: React.FC = () => {
                       </svg>
                       Editar
                     </CustomButton>
-                  </td>
-
-                  <td className="px-4 py-2">
-                    <button
-                      type="button"
-                      className="inline-flex items-center gap-2 rounded border border-indigo-600 bg-indigo-600 px-2 sm:px-3 py-2 text-sm font-medium text-white hover:bg-transparent hover:text-indigo-600 focus:outline-none focus:ring active:text-indigo-500"
-                      onClick={() => changePassword(item.email)}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth="1.5"
-                        stroke="currentColor"
-                        className="h-4 w-4"
-                      >
-                        <path strokeLinecap="round"
-                          strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                      Cambiar Contraseña
-                    </button>
                   </td>
 
                 </tr>
@@ -605,4 +552,4 @@ const UserCRUD: React.FC = () => {
   );
 };
 
-export default UserCRUD;
+export default OrganizationCRUD;

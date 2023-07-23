@@ -103,7 +103,6 @@ const FormLogin: React.FC = () => {
       setMessageError(data.errors[0].msg);
     } else if (data.token) {
       setMessageVerification('Ha Iniciado Sesión Correctamente');
-      setSession(data.token);
       Router.push('/Lobby');
     } else {
       setMessageError('Error Inesperado');
@@ -184,6 +183,7 @@ const FormLogin: React.FC = () => {
   };
 
   // -------------------------------Funciones de para seguir la autenticacion-------------------------------
+
   // Determinara el usuario esta autenticado
   useEffect(() => {
     setIsSession(checkSession());
@@ -197,9 +197,8 @@ const FormLogin: React.FC = () => {
   };
 
   // Si el usuario no cerro la sesion refrescara la pagina
-  const CloseSession = () => {
-    removeSession();
-    window.location.href = '/';
+  const CloseSession = async () => {
+    await removeSession();
   };
 
   return (

@@ -1,27 +1,38 @@
 import createClient from '@/db/supabaseClient';
-import { fetchData, fetchDataWithConfig } from "./Fetch";
+import { fetchDataWithConfig } from "./Fetch";
+import { generateToken } from './Jwt';
 
 
 // Función genérica para realizar una solicitud POST
-export const ReadRequest = async (url: string): Promise<any> => {
-    const response = await fetchData(url);
+export const ReadRequest = async (url: string, newItem: any): Promise<any> => {
+    const token = generateToken(newItem);
+
+    const config = {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    };
+
+    const response = await fetchDataWithConfig(url, config);
     return response;
 };
 
-export const ReadRequestS = async (url: string): Promise<any> => {
-    console.log(url);
-    const response = await createClient.from('user').select('*');
+export const ReadRequestS = async (table: string): Promise<any> => {
+    const response = await createClient.from(table).select('*');
     return response;
 };
 
 // Función genérica para realizar una solicitud POST
 export const CreateRequest = async (url: string, newItem: any): Promise<any> => {
+
+    const token = generateToken(newItem);
+
     const config = {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(newItem),
     };
 
     const response = await fetchDataWithConfig(url, config);
@@ -30,26 +41,28 @@ export const CreateRequest = async (url: string, newItem: any): Promise<any> => 
 
 // Función genérica para realizar una solicitud PUT
 export const UpdateRequest = async (url: string, newItem: any): Promise<any> => {
+    const token = generateToken(newItem);
+
     const config = {
-        method: 'PUT',
+        method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(newItem),
     };
 
     const response = await fetchDataWithConfig(url, config);
     return response;
 };
 
-export const DeleteRequest = async (url: string, idsToDelete: any): Promise<any> => {
+export const DeleteRequest = async (url: string, Item: any): Promise<any> => {
+
+    const token = generateToken(Item);
 
     const config = {
-        method: 'DELETE',
+        method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(idsToDelete),
     }
 
     const response = await fetchDataWithConfig(url, config);
