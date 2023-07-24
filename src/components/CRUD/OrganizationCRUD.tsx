@@ -4,7 +4,7 @@ import ModalCRUD from '../Widgets/ModalCRUD';
 import Alert from '../Widgets/Alert';
 import AlertVerification from '../Widgets/AlertVerification';
 
-import { CreateRequest, DeleteRequest, ReadRequest, ReadRequestS, UpdateRequest } from '@/utils/CRUD';
+import { CreateRequest, DeleteRequest, ReadRequest, UpdateRequest } from '@/utils/CRUD';
 import CustomButton from '../Widgets/VerticalMenu/Button/CustomButton';
 import { getSession } from '@/utils/LocalStorage';
 
@@ -38,6 +38,9 @@ const OrganizationCRUD: React.FC = () => {
   const fetchItems = async () => {
     try {
       const url = url_item + `/listMycompanies`;
+      
+      const access_token = localStorage.getItem('access_token_Request');
+      
       if (access_token) {
 
         const config = {
@@ -45,13 +48,11 @@ const OrganizationCRUD: React.FC = () => {
         }
 
         //const response = await ReadRequestS("organization");
-
         const response = await ReadRequest(url,config);
 
-        console.log(response);
-
-        if (response && response.data) {
-          setItems(response.data);
+        if (response && response.data && Array.isArray(response.data)) {
+          const organizations = response.data.map((item: { organization: any; }) => item.organization);
+          setItems(organizations);
           clearCheckbox();
         }
         else {
@@ -70,6 +71,8 @@ const OrganizationCRUD: React.FC = () => {
   const handleCreate = async () => {
     try {
       const url = url_item + `/createCompany`;
+
+      const access_token = localStorage.getItem('access_token_Request');
 
       if (access_token) {
         const Item = { ...newItem, access_token: access_token };
@@ -91,6 +94,7 @@ const OrganizationCRUD: React.FC = () => {
     try {
 
       const url = url_item + `/renameCompany`;
+      const access_token = localStorage.getItem('access_token_Request');
       if (access_token) {
 
         const config = {
@@ -114,6 +118,7 @@ const OrganizationCRUD: React.FC = () => {
   const handleDeleteSelected = async () => {
     try {
       const url = url_item + `/deleteCompany`;
+      const access_token = localStorage.getItem('access_token_Request');
       if (access_token) {
         const idsToDelete = selectedItems.map(item => item.organizationID);
         for (const idToDelete of idsToDelete) {
@@ -230,18 +235,15 @@ const OrganizationCRUD: React.FC = () => {
 
   // -------------------------------Funciones de Extra-------------------------------
 
-  const [access_token, setAccessToken] = useState('');
-
   useEffect(() => {
 
     const obtenerTokenDeAcceso = async () => {
-      const token = await getSession();
-      setAccessToken(token);
+      await getSession();
+      fetchItems();
     };
 
     obtenerTokenDeAcceso();
 
-    fetchItems();
   }, [currentPage]);
 
   // // Variables del Componente Modal
@@ -442,7 +444,7 @@ const OrganizationCRUD: React.FC = () => {
             <tbody className="divide-y divide-gray-200">
               {getCurrentPageItems().map(item => (
 
-                <tr key={item.organization.organizationID}>
+                <tr key={item.organizationID}>
 
                   <td className="px-4 py-2">
                     <div className='h-5 w-5 rounded border-gray-300'>

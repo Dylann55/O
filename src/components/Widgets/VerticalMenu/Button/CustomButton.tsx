@@ -12,15 +12,18 @@ interface CustomButtonProps {
 }
 
 const CustomButton: React.FC<CustomButtonProps> = ({ onClick, color, x, smx, mdx, y, type = 'button', children }) => {
+  const buttonClassName = `inline-flex items-center gap-2 rounded border border-${color}-600 bg-${color}-600 px-${x} sm:px-${smx} md:px-${mdx} py-${y} text-sm font-medium text-white hover:bg-transparent hover:text-${color}-600 focus:outline-none focus:ring active:text-${color}-500`;
+
   return (
     <button
       type={type}
-      className={`inline-flex items-center gap-2 rounded border border-${color}-600 bg-${color}-600 px-${x} sm:px-${smx} md:px-${mdx} py-${y} text-sm font-medium text-white hover:bg-transparent hover:text-${color}-600 focus:outline-none focus:ring active:text-${color}-500`}
+      className={buttonClassName}
       onClick={onClick}
     >
       {children}
     </button>
   );
 };
+
 
 export default CustomButton;

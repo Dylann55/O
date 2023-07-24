@@ -1,7 +1,9 @@
 // eslint-disable-next-line import/no-cycle
 import { SignOut } from '@/utils/DBFuntion';
-import { verifyToken } from '@/utils/Jwt';
+import { generateToken, verifyToken } from '@/utils/Jwt';
 import createClient from '@/db/supabaseClient';
+import { fetchDataWithConfig } from './Fetch';
+
 
 export const setSession = (decoded: any): void => {
   const token = verifyToken(decoded);
@@ -14,6 +16,7 @@ export const removeSession = async (): Promise<void> => {
   localStorage.removeItem('access_token');
   localStorage.removeItem('email');
   localStorage.removeItem('id');
+  localStorage.removeItem('session');
 
   // Inicializo una instancia para las funciones de la base de datos
   const instanciaSignOut = new SignOut();
@@ -30,8 +33,28 @@ export const getSession = async (): Promise<any | null> => {
   }
 
   const { session } = data;
-  console.log(session?.access_token);
-  return session?.access_token;
+
+  if (session?.refresh_token) {
+
+    const refresh_token = session.refresh_token;
+
+    const token = generateToken({refresh_token});
+    
+    const config = {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    const url = process.env.NEXT_PUBLIC_MIDDLE_URL + '/auth/refreshToken';
+    const response= await fetchDataWithConfig(url, config);
+
+    const decoded = verifyToken(response);
+
+    localStorage.setItem('session',decoded.data.session);
+    localStorage.setItem('access_token_Request',decoded.data.session.access_token);
+  }
 };
 
 export const checkSession = (): boolean => {

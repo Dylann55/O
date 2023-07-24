@@ -103,6 +103,7 @@ const FormLogin: React.FC = () => {
       setMessageError(data.errors[0].msg);
     } else if (data.token) {
       setMessageVerification('Ha Iniciado Sesión Correctamente');
+      setSession(data.token);
       Router.push('/Lobby');
     } else {
       setMessageError('Error Inesperado');
