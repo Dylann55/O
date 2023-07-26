@@ -1,36 +1,43 @@
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 
-import { BsPersonFill } from 'react-icons/bs';
 import ModalCRUD from '../Widgets/ModalCRUD';
 import Alert from '../Widgets/Alert';
 import AlertVerification from '../Widgets/AlertVerification';
-
-import { generateToken } from '@/utils/Jwt';
-import { fetchDataWithConfig } from '@/utils/Fetch';
-import { CreateRequest, DeleteRequest, ReadRequestS, UpdateRequest } from '@/utils/CRUD';
 import CustomButton from '../Widgets/Button/CustomButton';
+import NumberInput from '../Widgets/Imput/NumberInput';
+
+import { CreateRequest, DeleteRequest, ReadRequest, UpdateRequest } from '@/utils/CRUD';
+import { getSession } from '@/utils/LocalStorage';
 
 interface Item {
-  id: number;
-  name: string;
-  email: string;
-  lastname: string;
+  vehicleID: number;
+  patent: string;
+  mark: string;
+  model: string;
+  maxWeight: number;
 }
 
 const ITEMS_PER_PAGE = 30; // Numero de elementos a mostrar por pagina
-const url_item = process.env.NEXT_PUBLIC_MIDDLE_URL;
 
-const UserCRUD: React.FC = () => {
+interface VehicleCRUDProps {
+  urls: string[];
+}
 
-  const [itemName] = useState<string>('Usuario');
+const VehicleCRUD: React.FC<VehicleCRUDProps> = ({ urls }) => {
+
+  const [itemName] = useState<string>('Vehiculos');
+  const router = useRouter();
+  const { id, name } = router.query;
 
   const [items, setItems] = useState<Item[]>([]);
   const [selectedItems, setSelectedItems] = useState<Item[]>([]);
   const [newItem, setNewItem] = useState<Item>({
-    id: 0,
-    name: '',
-    email: '',
-    lastname: ''
+    vehicleID: 0,
+    patent: '',
+    mark: '',
+    model: '',
+    maxWeight: 0,
   });
 
   const [updateId, setUpdateId] = useState<number | null>(null);
@@ -43,38 +50,52 @@ const UserCRUD: React.FC = () => {
 
   const fetchItems = async () => {
     try {
-      //const url = url_item + ``
+      const url = urls[0] || '';
 
-      const response = await ReadRequestS("user");
-      if (response && response.data) {
-        setItems(response.data);
+      const access_token = localStorage.getItem('access_token_Request');
+
+      if (access_token) {
+        const config = {
+          access_token: access_token,
+          organizationID: id,
+        }
+
+        const response = await ReadRequest(url, config);
+        if (!response.error) {
+          if (response.message) {
+            setMessageError(response.message);
+          }
+          setItems(response);
+          clearCheckbox();
+        }
       }
       else {
-        setMessageError(response.error.message);
+        setMessageError("Expiro la Session")
       }
 
     } catch (error) {
-      setMessageError('Error fetching data:' + (error as Error).message);
+      setMessageError(`Error seaching ${itemName}:` + (error as Error).message);
     }
   };
 
   const handleCreate = async () => {
     try {
-      const url = url_item + ``
+      const url = urls[1] || '';
 
-      const response = await CreateRequest(url, newItem);
+      const access_token = localStorage.getItem('access_token_Request');
 
-      // Actualizar el estado de items con los nuevos datos
-      if (response && response.data) {
-        fetchItems();
+      if (access_token) {
+        const Item = { ...newItem, access_token: access_token, organizationID: id };
+        console.log(Item);
+        const response = await CreateRequest(url, Item);
+        OptionMessage(response);
       }
       else {
-        setMessageError(response.error.message);
+        setMessageError("Expiro la Session")
       }
 
-      ClearItem();
     } catch (error) {
-      setMessageError('Error creating item:' + (error as Error).message);
+      setMessageError(`Error creating ${itemName}:` + (error as Error).message);
     }
   };
 
@@ -83,48 +104,53 @@ const UserCRUD: React.FC = () => {
 
     try {
 
-      console.log(newItem);
-      const url = url_item + `/${updateId}`
+      const url = urls[2] || '';
+      const access_token = localStorage.getItem('access_token_Request');
+      if (access_token) {
 
-      const response = await UpdateRequest(url, newItem);
-
-      // Actualizar el estado de items con los nuevos datos
-      if (response && response.data) {
-        fetchItems();
+        const config = {
+          vehicleID: updateId,
+          patent: newItem.patent,
+          access_token: access_token,
+          mark: newItem.mark,
+          model: newItem.model,
+          maxWeight: newItem.maxWeight,
+          organizationID: id,
+        }
+        const response = await UpdateRequest(url, config);
+        OptionMessage(response);
       }
+
       else {
-        setMessageError(response.error.message);
+        setMessageError("Expiro la Session")
       }
-
-      ClearItem();
     } catch (error) {
-      setMessageError('Error updating item:' + (error as Error).message);
+      setMessageError(`Error updating ${itemName}:` + (error as Error).message);
     }
   };
 
   const handleDeleteSelected = async () => {
     try {
-      const idsToDelete = selectedItems.map(item => item.id);
-
-      console.log(idsToDelete);
-
-      const url = url_item + ``
-
-      const response = await DeleteRequest(url, newItem);
-
-      // Actualizar el estado de items con los nuevos datos
-      if (response && response.data) {
-        fetchItems();
+      const url = urls[3] || '';
+      const access_token = localStorage.getItem('access_token_Request');
+      if (access_token) {
+        const idsToDelete = selectedItems.map(item => item.vehicleID);
+        for (const idToDelete of idsToDelete) {
+          const config = {
+            access_token: access_token,
+            vehicleID: idToDelete,
+            organizationID: id,
+          }
+          const response = await DeleteRequest(url, config);
+          console.log(response);
+          OptionMessage(response);
+        }
       }
       else {
-        setMessageError(response.error.message);
+        setMessageError("Expiro la Session")
       }
-
-      const updatedItems = items.filter(item => !idsToDelete.includes(item.id));
-      setItems(updatedItems);
-      setSelectedItems([]);
     } catch (error) {
-      setMessageError('Error deleting items:' + (error as Error).message);
+      setMessageError(`Error deleting ${itemName}:` + (error as Error).message);
     }
   };
 
@@ -138,24 +164,31 @@ const UserCRUD: React.FC = () => {
   };
 
   const handleEdit = (item: Item) => {
-    setUpdateId(item.id);
+    setUpdateId(item.vehicleID);
     setNewItem({
-      id: item.id,
-      name: item.name,
-      email: item.email,
-      lastname: item.lastname,
+      vehicleID: item.vehicleID,
+      patent: item.patent,
+      mark: item.mark,
+      model: item.model,
+      maxWeight: item.maxWeight,
     });
     openLoginModal();
   };
 
-  const ClearItem = () => {
+  const clearItem = () => {
     setUpdateId(null);
     setNewItem({
-      id: 0,
-      name: '',
-      email: '',
-      lastname: '',
+      vehicleID: 0,
+      patent: '',
+      mark: '',
+      model: '',
+      maxWeight: 0,
     });
+  }
+
+  const clearCheckbox = () => {
+    setSelectedItems([]);
+    setSelectAll(false);
   }
 
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>, item: Item) => {
@@ -163,7 +196,7 @@ const UserCRUD: React.FC = () => {
       setSelectedItems(prevSelectedItems => [...prevSelectedItems, item]);
     } else {
       setSelectedItems(prevSelectedItems =>
-        prevSelectedItems.filter(selectedItem => selectedItem.id !== item.id)
+        prevSelectedItems.filter(selectedItem => selectedItem.vehicleID !== item.vehicleID)
       );
     }
   };
@@ -173,12 +206,45 @@ const UserCRUD: React.FC = () => {
     setSelectedItems(event.target.checked ? items : []);
   };
 
+  const OptionMessage = (data: any): void => {
+    if (data.error) {
+      setMessageError(data.error);
+    }
+    else if (data.message) {
+      if (data.message == "Se actualizo el peso máximo con éxito" ||
+        data.message == "Se ha eliminado el transporte exitosamente" ||
+        data.message == "se ha agregado el transporte a la empresa exitosamente" ||
+        data.message == "El transporte se creo exitosamente" ||
+        data.message == "Se actualizó el transporte exitosamente"
+      ) {
+        setMessageVerification(data.message);
+        fetchItems();
+        closeModal();
+      }
+      setMessageError(data.message);
+    }
+    else if (data.errors) {
+      setMessageError(data.errors[0].msg);
+    }
+    else if (data) {
+      setMessageError(data);
+    } else {
+      setMessageError('Error Inesperado');
+    }
+  };
+
   // -------------------------------Funciones para la Paginacion-------------------------------
   const getCurrentPageItems = () => {
+    if (!Array.isArray(items)) {
+      return [];
+    }
+
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
+
     return items.slice(startIndex, endIndex);
   };
+
 
   const handlePrevPage = () => {
     setCurrentPage(prevPage => prevPage - 1);
@@ -189,31 +255,15 @@ const UserCRUD: React.FC = () => {
   };
 
   // -------------------------------Funciones de Extra-------------------------------
-  const changePassword = async (email: string) => {
-    const user = {
-      email,
-    };
-
-    const config = {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${generateToken(user)}`,
-      },
-    };
-    try {
-      const url = `${process.env.NEXT_PUBLIC_MIDDLE_URL}/auth/recoverPassword`;
-      const data = await fetchDataWithConfig(url, config);
-      if (data.message === 'Correo de restablecimiento de contraseña enviado') {
-        setMessageVerification(data.message);
-      }
-      setMessageError(data.message);
-    } catch (error) {
-      setMessageError((error as Error).message);
-    }
-  }
 
   useEffect(() => {
-    fetchItems();
+
+    const obtenerTokenDeAcceso = async () => {
+      await getSession();
+      fetchItems();
+    };
+    obtenerTokenDeAcceso();
+
   }, [currentPage]);
 
   // // Variables del Componente Modal
@@ -240,26 +290,27 @@ const UserCRUD: React.FC = () => {
   // Funcion que cierra el modal para loguearse
   const closeModal = () => {
     setModalOpen(false);
-
-    ClearItem();
-
-    closeAlert();
+    clearItem();
   };
 
   return (
     <div>
 
-      {messageError && (
-        <>
-          <Alert message={messageError} onClose={closeAlert} />
-        </>
-      )}
+      <div className="space-y-4">
 
-      {messageVerification && (
-        <>
-          <AlertVerification message={messageVerification} onClose={closeAlert} />
-        </>
-      )}
+        {messageError && (
+          <>
+            <Alert message={messageError} onClose={closeAlert} />
+          </>
+        )}
+
+        {messageVerification && (
+          <>
+            <AlertVerification message={messageVerification} onClose={closeAlert} />
+          </>
+        )}
+
+      </div>
 
       <ModalCRUD isOpen={ModalOpen}>
         <div className="mx-auto mt-10 max-w-screen items-center px-6 sm:px-8">
@@ -271,6 +322,7 @@ const UserCRUD: React.FC = () => {
               </h1>
 
               <h2 className="text-center text-lg font-medium">
+                Creacion de Vehiculos para {name}
               </h2>
 
               <p className="mx-auto mt-4 max-w-md text-center text-gray-500">
@@ -278,14 +330,15 @@ const UserCRUD: React.FC = () => {
             </div>
 
             <div>
+
               <div className="relative flex items-center">
                 <input
                   type="text"
-                  id="email"
-                  value={newItem.email || ''}
-                  onChange={(e) => setNewItem({ ...newItem, email: e.target.value })}
+                  id="patent"
+                  value={newItem.patent || ''}
+                  onChange={(e) => setNewItem({ ...newItem, patent: e.target.value })}
                   className="w-full rounded-lg border-gray-200 p-4 text-sm shadow-sm"
-                  placeholder="Ingresar Email"
+                  placeholder="Ingresar Patente del Vehiculo"
                 />
 
                 <span className="absolute inset-y-0 right-0 flex items-center pr-4">
@@ -309,11 +362,11 @@ const UserCRUD: React.FC = () => {
               <div className="relative flex items-center">
                 <input
                   type="text"
-                  id="name"
-                  value={newItem.name || ''}
-                  onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
+                  id="mark"
+                  value={newItem.mark || ''}
+                  onChange={(e) => setNewItem({ ...newItem, mark: e.target.value })}
                   className="w-full rounded-lg border-gray-200 p-4 text-sm shadow-sm"
-                  placeholder="Ingresar Nombre"
+                  placeholder="Ingresar Marca del Vehiculo"
                 />
 
                 <span className="absolute inset-y-0 right-0 flex items-center pr-4">
@@ -337,11 +390,11 @@ const UserCRUD: React.FC = () => {
               <div className="relative flex items-center">
                 <input
                   type="text"
-                  id="lastname"
-                  value={newItem.lastname || ''}
-                  onChange={(e) => setNewItem({ ...newItem, lastname: e.target.value })}
+                  id="model"
+                  value={newItem.model || ''}
+                  onChange={(e) => setNewItem({ ...newItem, model: e.target.value })}
                   className="w-full rounded-lg border-gray-200 p-4 text-sm shadow-sm"
-                  placeholder="Ingresar Apellido"
+                  placeholder="Ingresar Modelo del Vehiculo"
                 />
 
                 <span className="absolute inset-y-0 right-0 flex items-center pr-4">
@@ -361,28 +414,70 @@ const UserCRUD: React.FC = () => {
                   </svg>
                 </span>
               </div>
+
+              <div className="flex flex-col items-center mt-4 sm:mt-0 gap-2 sm:flex-row sm:justify-center">
+                <p className='text-gray-600 text-sm'>Ingresar Peso Máximo del Vehículo</p>
+                <NumberInput
+                  value={newItem.maxWeight}
+                  onChange={(value) => setNewItem({ ...newItem, maxWeight: value })}
+                  placeholder="Ingresar Peso Máximo del Vehículo"
+                />
+              </div>
+
             </div>
 
             <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-center">
 
               <CustomButton onClick={handleSubmit} type="submit"
                 color="indigo"
-                x="8"
-                smx="10"
-                mdx="16"
-                y="2.5"
+                padding_x="12"
+                padding_smx="12"
+                padding_mdx="12"
+                padding_y="2.5"
+                width="32"
+                height="10"
               >
+                {!updateId && (
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                )}
+
+                {updateId && (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.5"
+                    stroke="currentColor"
+                    className="h-6 w-6"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
+                    />
+                  </svg>
+                )}
+
                 {updateId ? `Editar ${itemName}` : `Crear ${itemName}`}
               </CustomButton>
 
               <CustomButton onClick={closeModal} type="button"
                 color="red"
-                x="12"
-                smx="10"
-                mdx="20"
-                y="2.5"
+                padding_x="20"
+                padding_smx="20"
+                padding_mdx="20"
+                padding_y="2.5"
+                width="32"
+                height="10"
               >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+
                 Cancelar
+
               </CustomButton>
 
             </div>
@@ -396,10 +491,12 @@ const UserCRUD: React.FC = () => {
 
           <CustomButton onClick={openLoginModal} type="button"
             color="indigo"
-            x="4"
-            smx="10"
-            mdx="20"
-            y="2.5"
+            padding_x="3"
+            padding_smx="8"
+            padding_mdx="12"
+            padding_y="2"
+            width="32"
+            height="15"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -409,10 +506,13 @@ const UserCRUD: React.FC = () => {
 
           <CustomButton onClick={handleDeleteSelected} type="button"
             color="red"
-            x="4"
-            smx="10"
-            mdx="20"
-            y="2.5">
+            padding_x="3"
+            padding_smx="8"
+            padding_mdx="12"
+            padding_y="2"
+            width="32"
+            height="15"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -449,19 +549,23 @@ const UserCRUD: React.FC = () => {
                 </th>
 
                 <th className="text-start whitespace-nowrap px-4 py-2 font-medium text-gray-900">
-                  Nombre Completo
+                  ID de la {itemName}
                 </th>
 
                 <th className="text-start whitespace-nowrap px-4 py-2 font-medium text-gray-900">
-                  Email
+                  Marca del {itemName}
+                </th>
+
+                <th className="text-start whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+                  Patente del {itemName}
+                </th>
+
+                <th className="text-start whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+                  Maximo Peso del {itemName}
                 </th>
 
                 <th className="text-start whitespace-nowrap px-4 py-2 font-medium text-gray-900">
                   Metodos
-                </th>
-
-                <th className="text-start whitespace-nowrap px-4 py-2 font-medium text-gray-900">
-                  Accion
                 </th>
 
               </tr>
@@ -469,7 +573,8 @@ const UserCRUD: React.FC = () => {
 
             <tbody className="divide-y divide-gray-200">
               {getCurrentPageItems().map(item => (
-                <tr key={item.id} className=''>
+
+                <tr key={item.vehicleID}>
 
                   <td className="px-4 py-2">
                     <div className='h-5 w-5 rounded border-gray-300'>
@@ -481,27 +586,33 @@ const UserCRUD: React.FC = () => {
                     </div>
                   </td>
 
-                  <td className="whitespace-nowrap px-4 py-2 font-medium">
-                    <div className='flex items-center'>
-                      <div className='bg-indigo-100 p-3 rounded-lg'>
-                        <BsPersonFill className='text-indigo-500' />
-                      </div>
-                      <p className='text-gray-600 pl-4'>{item.name + ' ' + item.lastname}</p>
-                    </div>
+                  <td className="text-gray-600 whitespace-nowrap px-4 py-2 font-medium">
+                    {item.vehicleID}
                   </td>
 
                   <td className="text-gray-600 whitespace-nowrap px-4 py-2 font-medium">
-                    {item.email}
+                    {item.mark}
+                  </td>
+
+                  <td className="text-gray-600 whitespace-nowrap px-4 py-2 font-medium">
+                    {item.patent}
+                  </td>
+
+                  <td className="text-gray-600 whitespace-nowrap px-4 py-2 font-medium">
+                    {item.maxWeight}
                   </td>
 
                   <td className="px-4 py-2">
 
                     <CustomButton onClick={() => handleEdit(item)} type="button"
                       color="indigo"
-                      x="6"
-                      smx="12"
-                      mdx="22"
-                      y="2"
+                      padding_x="4"
+                      padding_smx="6"
+                      padding_mdx="8"
+                      padding_y="2"
+                      width="32"
+                      height="10"
+
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -519,26 +630,6 @@ const UserCRUD: React.FC = () => {
                       </svg>
                       Editar
                     </CustomButton>
-                  </td>
-
-                  <td className="px-4 py-2">
-                    <button
-                      type="button"
-                      className="inline-flex items-center gap-2 rounded border border-indigo-600 bg-indigo-600 px-2 sm:px-3 py-2 text-sm font-medium text-white hover:bg-transparent hover:text-indigo-600 focus:outline-none focus:ring active:text-indigo-500"
-                      onClick={() => changePassword(item.email)}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth="1.5"
-                        stroke="currentColor"
-                        className="h-4 w-4"
-                      >
-                        <path strokeLinecap="round"
-                          strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                      Cambiar Contraseña
-                    </button>
                   </td>
 
                 </tr>
@@ -604,4 +695,4 @@ const UserCRUD: React.FC = () => {
   );
 };
 
-export default UserCRUD;
+export default VehicleCRUD;

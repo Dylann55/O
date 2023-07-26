@@ -17,7 +17,7 @@ const ModalCRUD: React.FC<ModalProps> = ({ isOpen, children }) => {
       className={`${styles.modalOverlay} md:${styles.modalOverlay}`}
     >
       <div
-        className={`${styles.modalContent}`}
+        className={`${styles.modalContent} ml-16`}
       >
         {children}
       </div>

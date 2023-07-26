@@ -81,6 +81,8 @@ class SupaBaseAuthStateSocial extends AuthStateSocial {
             const user = {
               email,
               id,
+              name: '',
+              lastName: ''
             };
             const config = {
               method: 'POST',

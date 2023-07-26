@@ -17,6 +17,7 @@ export const removeSession = async (): Promise<void> => {
   localStorage.removeItem('email');
   localStorage.removeItem('id');
   localStorage.removeItem('session');
+  localStorage.removeItem('access_token_Request');
 
   // Inicializo una instancia para las funciones de la base de datos
   const instanciaSignOut = new SignOut();
@@ -26,6 +27,7 @@ export const removeSession = async (): Promise<void> => {
 };
 
 export const getSession = async (): Promise<any | null> => {
+  
   const { data, error } = await createClient.auth.refreshSession();
 
   if (error) {

@@ -19,6 +19,9 @@ import ButtonCustomer from '../Widgets/ButtonCustomer';
 import Modal from '../Widgets/Modal';
 import UserForm from './UserForm';
 
+//Clases
+import { AuthStateSocial } from '@/utils/DBFuntion';
+
 const FormLogin: React.FC = () => {
   // Variables del Componente Modal
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -104,7 +107,7 @@ const FormLogin: React.FC = () => {
     } else if (data.token) {
       setMessageVerification('Ha Iniciado Sesión Correctamente');
       setSession(data.token);
-      Router.push('/Lobby');
+      Router.push('/Organization/MyOrganizations');
     } else {
       setMessageError('Error Inesperado');
     }
@@ -120,6 +123,8 @@ const FormLogin: React.FC = () => {
     const user = {
       email,
       password,
+      name: '',
+      lastName: ''
     };
 
     const config = {
@@ -185,15 +190,19 @@ const FormLogin: React.FC = () => {
 
   // -------------------------------Funciones de para seguir la autenticacion-------------------------------
 
+  // Inicializo un clase para las funciones de la base de datos
+  const instanciaAuthStateSocial = new AuthStateSocial();
+
   // Determinara el usuario esta autenticado
   useEffect(() => {
+    instanciaAuthStateSocial.checkSessionSocial();
     setIsSession(checkSession());
   }, []);
 
   // Si el usuario esta autenticado, mandara al usuario al Lobby principal
   const Dashboard = () => {
     if (isSession) {
-      Router.push('/Lobby');
+      Router.push('/Organization/MyOrganizations');
     }
   };
 

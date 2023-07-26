@@ -1,4 +1,7 @@
+import { useEffect } from "react";
 import NestedList from "./VerticalMenu";
+import VerifyUser from "@/utils/VerifyAdministrador";
+
 
 const menu = [
     {
@@ -6,54 +9,24 @@ const menu = [
         href: '',
         subMenu: [
             {
-                label: 'Compañias',
-                href: '/Administrador/Organization',
+                label: 'Usuarios',
+                href: '/Administrator/Users',
+
             },
             {
-                label: 'Usuario',
-                href: '/Administrador/Invite',
+                label: 'Organizaciones',
+                href: '/Administrator/Organization',
             },
-            {
-                label: 'Teams',
-                href: '',
-                subMenu: [
-                    {
-                        label: 'Banned Users',
-                        href: '',
-                    },
-                    {
-                        label: 'Calendar',
-                        href: '',
-                    },
-                ],
-            },
-            {
-                label: 'Invoices',
-                href: '',
-            },
-            {
-                label: 'Account',
-                href: '',
-                subMenu: [
-                    {
-                        label: 'Details',
-                        href: '',
-                    },
-                    {
-                        label: 'Security',
-                        href: '',
-                    },
-                    {
-                        label: 'Logout',
-                        href: '/logout',
-                    },
-                ],
-            },
+
         ],
     },
 ];
 
 export default function AdministradorVM() {
+
+    useEffect(() => {
+        VerifyUser();
+    }, []);
 
     return (
         <>

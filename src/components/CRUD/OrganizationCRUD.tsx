@@ -5,8 +5,9 @@ import Alert from '../Widgets/Alert';
 import AlertVerification from '../Widgets/AlertVerification';
 
 import { CreateRequest, DeleteRequest, ReadRequest, UpdateRequest } from '@/utils/CRUD';
-import CustomButton from '../Widgets/VerticalMenu/Button/CustomButton';
+import CustomButton from '../Widgets/Button/CustomButton';
 import { getSession } from '@/utils/LocalStorage';
+import Link from 'next/link';
 
 interface Item {
   organizationID: number;
@@ -14,9 +15,12 @@ interface Item {
 }
 
 const ITEMS_PER_PAGE = 30; // Numero de elementos a mostrar por pagina
-const url_item = process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage';
 
-const OrganizationCRUD: React.FC = () => {
+interface OrganizationCRUDProps {
+  urls: string[];
+}
+
+const OrganizationCRUD: React.FC<OrganizationCRUDProps> = ({ urls }) => {
 
   const [itemName] = useState<string>('Organizacion');
 
@@ -37,26 +41,31 @@ const OrganizationCRUD: React.FC = () => {
 
   const fetchItems = async () => {
     try {
-      const url = url_item + `/listMycompanies`;
-      
-      const access_token = localStorage.getItem('access_token_Request');
-      
-      if (access_token) {
+      const url = urls[0] || '';
 
+      const access_token = localStorage.getItem('access_token_Request');
+
+      if (access_token) {
         const config = {
           access_token: access_token,
         }
 
         //const response = await ReadRequestS("organization");
-        const response = await ReadRequest(url,config);
+        const response = await ReadRequest(url, config);
 
-        if (response && response.data && Array.isArray(response.data)) {
-          const organizations = response.data.map((item: { organization: any; }) => item.organization);
+        if (response.data && Array.isArray(response.data)) {
+          // Formato 1: La respuesta tiene una propiedad "data" que es un array
+          const organizations = response.data.map((item: { organization: any }) => item.organization);
           setItems(organizations);
           clearCheckbox();
-        }
-        else {
-          setMessageError(response.error);
+
+        } else if (!response.data && !response.error) {
+          // Formato 2: La respuesta tiene una propiedad "organization" directamente
+          setItems(response);
+          clearCheckbox();
+
+        } else {
+          setMessageError("Error Durante la Busqueda");
         }
       }
       else {
@@ -70,13 +79,13 @@ const OrganizationCRUD: React.FC = () => {
 
   const handleCreate = async () => {
     try {
-      const url = url_item + `/createCompany`;
+      const url = urls[1] || '';
 
       const access_token = localStorage.getItem('access_token_Request');
-
       if (access_token) {
         const Item = { ...newItem, access_token: access_token };
         const response = await CreateRequest(url, Item);
+        console.log(response);
         OptionMessage(response);
       }
       else {
@@ -93,16 +102,14 @@ const OrganizationCRUD: React.FC = () => {
 
     try {
 
-      const url = url_item + `/renameCompany`;
+      const url = urls[2] || '';
       const access_token = localStorage.getItem('access_token_Request');
       if (access_token) {
-
         const config = {
           organizationID: updateId,
           name: newItem.name,
           access_token: access_token,
         }
-
         const response = await UpdateRequest(url, config);
         OptionMessageUD(response);
       }
@@ -117,7 +124,7 @@ const OrganizationCRUD: React.FC = () => {
 
   const handleDeleteSelected = async () => {
     try {
-      const url = url_item + `/deleteCompany`;
+      const url = urls[3] || '';
       const access_token = localStorage.getItem('access_token_Request');
       if (access_token) {
         const idsToDelete = selectedItems.map(item => item.organizationID);
@@ -126,8 +133,9 @@ const OrganizationCRUD: React.FC = () => {
             access_token: access_token,
             organizationID: idToDelete,
           }
-
+          console.log(config);
           const response = await DeleteRequest(url, config);
+          console.log(response);
           OptionMessageUD(response);
         }
       }
@@ -189,7 +197,14 @@ const OrganizationCRUD: React.FC = () => {
     if (data.error) {
       setMessageError(data.error);
     } else if (data.message) {
+      if (data.message == "La empresa se creo exitosamente") {
+        setMessageVerification(data.message);
+        fetchItems();
+        closeModal();
+      }
       setMessageError(data.message);
+    } else if (data.errors) {
+      setMessageError(data.errors[0].msg);
     } else if (data) {
       setMessageVerification(data);
       fetchItems();
@@ -204,13 +219,20 @@ const OrganizationCRUD: React.FC = () => {
       setMessageError(data.error);
     }
     else if (data.message) {
-      if (data.message == "El nombre se actualizo exitosamente" || data.message == "Se eliminó la empresa") {
+      if (data.message == "El nombre se actualizo exitosamente" ||
+        data.message == "Se eliminó la empresa" ||
+        data.message == "Se actualizo exitosamente" ||
+        data.message == "Se eliminó exitosamente") {
         setMessageVerification(data.message);
         fetchItems();
         closeModal();
       }
       setMessageError(data.message);
-    } else if (data) {
+    }
+    else if (data.errors) {
+      setMessageError(data.errors[0].msg);
+    }
+    else if (data) {
       setMessageError(data);
     } else {
       setMessageError('Error Inesperado');
@@ -344,22 +366,54 @@ const OrganizationCRUD: React.FC = () => {
 
               <CustomButton onClick={handleSubmit} type="submit"
                 color="indigo"
-                x="8"
-                smx="10"
-                mdx="16"
-                y="2.5"
+                padding_x="12"
+                padding_smx="12"
+                padding_mdx="12"
+                padding_y="2.5"
+                width="32"
+                height="10"
               >
+                {!updateId && (
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                )}
+
+                {updateId && (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.5"
+                    stroke="currentColor"
+                    className="h-6 w-6"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
+                    />
+                  </svg>
+                )}
+
                 {updateId ? `Editar ${itemName}` : `Crear ${itemName}`}
               </CustomButton>
 
               <CustomButton onClick={closeModal} type="button"
                 color="red"
-                x="12"
-                smx="10"
-                mdx="20"
-                y="2.5"
+                padding_x="20"
+                padding_smx="20"
+                padding_mdx="20"
+                padding_y="2.5"
+                width="32"
+                height="10"
               >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+
                 Cancelar
+
               </CustomButton>
 
             </div>
@@ -373,10 +427,12 @@ const OrganizationCRUD: React.FC = () => {
 
           <CustomButton onClick={openLoginModal} type="button"
             color="indigo"
-            x="4"
-            smx="10"
-            mdx="20"
-            y="2.5"
+            padding_x="3"
+            padding_smx="8"
+            padding_mdx="12"
+            padding_y="2"
+            width="32"
+            height="15"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -386,10 +442,13 @@ const OrganizationCRUD: React.FC = () => {
 
           <CustomButton onClick={handleDeleteSelected} type="button"
             color="red"
-            x="4"
-            smx="10"
-            mdx="20"
-            y="2.5">
+            padding_x="3"
+            padding_smx="8"
+            padding_mdx="12"
+            padding_y="2"
+            width="32"
+            height="15"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -406,7 +465,6 @@ const OrganizationCRUD: React.FC = () => {
             </svg>
             Eliminar {itemName}
           </CustomButton>
-
 
         </div>
 
@@ -434,8 +492,8 @@ const OrganizationCRUD: React.FC = () => {
                   Nombre de la {itemName}
                 </th>
 
-                <th className="text-start whitespace-nowrap px-4 py-2 font-medium text-gray-900">
-                  Metodos
+                <th className="text-center whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+                  Acciones
                 </th>
 
               </tr>
@@ -464,14 +522,17 @@ const OrganizationCRUD: React.FC = () => {
                     {item.name}
                   </td>
 
-                  <td className="px-4 py-2">
+                  <td className="flex justify-center items-center space-x-4 px-4 py-2">
 
                     <CustomButton onClick={() => handleEdit(item)} type="button"
                       color="indigo"
-                      x="6"
-                      smx="12"
-                      mdx="22"
-                      y="2"
+                      padding_x="4"
+                      padding_smx="6"
+                      padding_mdx="8"
+                      padding_y="2"
+                      width="32"
+                      height="10"
+
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -489,6 +550,64 @@ const OrganizationCRUD: React.FC = () => {
                       </svg>
                       Editar
                     </CustomButton>
+
+                    <Link href={`/${urls[4]}/Vehicles/${item.organizationID}?name=${encodeURIComponent(item.name)}`}>
+                      <CustomButton
+                        type="button"
+                        color="indigo"
+                        padding_x="4"
+                        padding_smx="4"
+                        padding_mdx="4"
+                        padding_y="2"
+                        width="32"
+                        height="10"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth="1.5"
+                          stroke="currentColor"
+                          className="h-4 w-4"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"
+                          />
+                        </svg>
+
+                        Ver Vehiculos
+                      </CustomButton>
+                    </Link>
+
+                    <Link href={`/${urls[4]}/Users/${item.organizationID}?name=${encodeURIComponent(item.name)}`}>
+                      <CustomButton type="button"
+                        color="indigo"
+                        padding_x="4"
+                        padding_smx="4"
+                        padding_mdx="4"
+                        padding_y="2"
+                        width="32"
+                        height="10"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth="1.5"
+                          stroke="currentColor"
+                          className="h-4 w-4"
+                        >
+                          <path strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+
+                        </svg>
+                        Ver Usuarios
+                      </CustomButton>
+                    </Link>
+
                   </td>
 
                 </tr>

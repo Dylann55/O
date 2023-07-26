@@ -6,14 +6,12 @@ import { generateToken } from './Jwt';
 // Función genérica para realizar una solicitud POST
 export const ReadRequest = async (url: string, newItem: any): Promise<any> => {
     const token = generateToken(newItem);
-
     const config = {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
         },
     };
-
     const response = await fetchDataWithConfig(url, config);
     return response;
 };
