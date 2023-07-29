@@ -12,9 +12,10 @@ const VerifyUser = async (): Promise<void> => {
       };
 
       const response = await ReadRequest(url, config);
-      if (!response) {
+      if (!response || response.error) {
         Router.push('/Organization/MyOrganizations');
       }
+
     } else {
       Router.push('/Organization/MyOrganizations');
     }

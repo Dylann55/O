@@ -11,9 +11,9 @@ export default function Users() {
     const { name, O_Name } = router.query;
 
     const myUrls = [
-        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/listMyParticipationCompany',
-        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/createProfileUser',
-        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/deleteProfileUser',
+        process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/listProfileUser',
+        process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/createProfileUser',
+        process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/deleteProfileUser',
     ];
 
     return (

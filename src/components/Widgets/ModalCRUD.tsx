@@ -14,10 +14,10 @@ const ModalCRUD: React.FC<ModalProps> = ({ isOpen, children }) => {
 
   return (
     <div
-      className={`${styles.modalOverlay} md:${styles.modalOverlay}`}
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden bg-black/50 outline-none focus:outline-none"
     >
       <div
-        className={`${styles.modalContent} ml-16`}
+        className={`${styles.modalContent} ml-20 mr-5`}
       >
         {children}
       </div>

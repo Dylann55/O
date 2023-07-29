@@ -4,7 +4,6 @@ import React from 'react';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 
-import { AuthStateSocial } from '@/utils/DBFuntion';
 import { checkSession, removeSession } from '@/utils/LocalStorage';
 import Link from 'next/link';
 
@@ -122,11 +121,9 @@ const navigation = [
 const Sidebar: React.FC = () => {
 
     // Inicializo un clase para las funciones de la base de datos
-    const instanciaAuthStateSocial = new AuthStateSocial();
     const router = useRouter();
 
     useEffect(() => {
-        instanciaAuthStateSocial.checkSessionSocial();
         if (!checkSession()) {
             router.push('/');
         }
@@ -211,7 +208,7 @@ const Sidebar: React.FC = () => {
                             />
                         </svg>
 
-                        <span className="absolute start-full top-1/2 -translate-y-1/2 translate-x-16 rounded bg-gray-900 px-2 py-1.5 text-xs font-medium text-white opacity-0 group-hover:opacity-100">
+                        <span className="absolute start-full top-1/2 -translate-y-1/2 translate-x-24 rounded bg-gray-900 w-24 px-2 py-1.5 text-xs font-medium text-white opacity-0 group-hover:opacity-100">
                             Cerrar Sesion
                         </span>
 

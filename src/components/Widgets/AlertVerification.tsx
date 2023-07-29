@@ -12,7 +12,7 @@ const AlertVerification: React.FC<AlertVerificationProps> = ({
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
-    }, 7000);
+    }, 70000);
 
     return () => clearTimeout(timer);
   }, [onClose]);
@@ -28,7 +28,7 @@ const AlertVerification: React.FC<AlertVerificationProps> = ({
     >
       <div
         role="alert"
-        className="fixed top-0 right-0 m-4 rounded-xl border border-gray-100 bg-white
+        className="fixed top-0 right-0 m-4 rounded-xl border  bg-green-100 text-green-700
         p-4 transition-transform duration-300 hover:scale-110 hover:shadow-xl focus:outline-none focus:ring"
       >
         <div className="flex items-start gap-4">
@@ -50,12 +50,12 @@ const AlertVerification: React.FC<AlertVerificationProps> = ({
           </span>
 
           <div className="flex-1">
-            <strong className="block font-medium text-gray-900">
+            <strong className="block font-medium font-bold">
               {' '}
               Mensaje de Verificacion{' '}
             </strong>
 
-            <p className="mt-1 text-sm text-gray-700">{message}</p>
+            <p className="mt-1 text-sm">{message}</p>
           </div>
         </div>
       </div>

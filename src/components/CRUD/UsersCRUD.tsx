@@ -9,7 +9,7 @@ import CustomButton from '../Widgets/Button/CustomButton';
 
 import { CreateRequest, DeleteRequest, ReadRequest, UpdateRequest } from '@/utils/CRUD';
 import { getSession } from '@/utils/LocalStorage';
-import Link from 'next/link';
+import RoleCRUD from './RoleCRUD';
 
 interface Item {
     userHasProfile: number;
@@ -19,6 +19,8 @@ interface Item {
     name: string;
     lastName: string;
     email: string;
+    ornganizationname: string;
+    organizationID: number;
 }
 
 type Profile = {
@@ -26,9 +28,13 @@ type Profile = {
 };
 
 const ITEMS_PER_PAGE = 30; // Numero de elementos a mostrar por pagina
-const url_item = process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage';
 
-const UsersCRUD: React.FC = () => {
+interface UsersCRUDProps {
+    urls: string[];
+    urlsRole: string[];
+}
+
+const UsersCRUD: React.FC<UsersCRUDProps> = ({ urls, urlsRole }) => {
 
     const [itemName] = useState<string>('Perfil');
     const router = useRouter();
@@ -43,14 +49,16 @@ const UsersCRUD: React.FC = () => {
         roles: '',
         name: '',
         lastName: '',
-        email: ''
+        email: '',
+        organizationID: 0,
+        ornganizationname: '',
     });
 
     const [Profile, setProfile] = useState<Profile>({
         profileIDs: [],
     });
 
-    const [updateId, setUpdateId] = useState<number | null>(null);
+
     const [selectAll, setSelectAll] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -60,7 +68,7 @@ const UsersCRUD: React.FC = () => {
 
     const fetchItems = async () => {
         try {
-            const url = url_item + `/userOrganizationRoles`;
+            const url = urls[0] || '';
 
             const access_token = localStorage.getItem('access_token_Request');
 
@@ -88,20 +96,19 @@ const UsersCRUD: React.FC = () => {
         }
     };
 
-    const handleCreate = async () => {
+    const handleCreate = async (event: React.FormEvent) => {
+        event.preventDefault();
         try {
 
             for (const profileID of Profile.profileIDs) {
 
-                const url = url_item + `/createProfileUser`;
+                const url = urls[1] || '';
 
                 const access_token = localStorage.getItem('access_token_Request');
-                console.log(Profile);
                 if (access_token) {
                     const Item = { ...newItem, access_token: access_token, organizationID: id, profileID: profileID };
-                    console.log(Item);
                     const response = await CreateRequest(url, Item);
-                    console.log(response);
+                    OptionMessage(response);
 
                 }
                 else {
@@ -113,84 +120,20 @@ const UsersCRUD: React.FC = () => {
         }
     };
 
-    const handleUpdate = async () => {
-        if (updateId === null) return;
-
-        try {
-
-            for (const profileID of Profile.profileIDs) {
-
-                const url = url_item + `/updateTransportMaxWeight`;
-                const access_token = localStorage.getItem('access_token_Request');
-                if (access_token) {
-
-                    const config = {
-                        userHasProfile: updateId,
-                        userID: newItem.userID,
-                        access_token: access_token,
-                        profileID: profileID,
-                        organizationID: id,
-                    }
-
-                    const response = await UpdateRequest(url, config);
-                    OptionMessage(response);
-                }
-
-                else {
-                    setMessageError("Expiro la Session")
-                }
-            }
-        } catch (error) {
-            setMessageError(`Error updating ${itemName}:` + (error as Error).message);
-        }
-    };
-
-    const handleoutdate = async () => {
-        if (updateId === null) return;
-
-        try {
-
-            for (const profileID of Profile.profileIDs) {
-
-                const url = url_item + `/updateTransportMaxWeight`;
-                const access_token = localStorage.getItem('access_token_Request');
-                if (access_token) {
-
-                    const config = {
-                        userHasProfile: updateId,
-                        userID: newItem.userID,
-                        access_token: access_token,
-                        profileID: profileID,
-                        organizationID: id,
-                    }
-
-                    const response = await UpdateRequest(url, config);
-                    OptionMessage(response);
-                }
-
-                else {
-                    setMessageError("Expiro la Session")
-                }
-            }
-        } catch (error) {
-            setMessageError(`Error updating ${itemName}:` + (error as Error).message);
-        }
-    };
-
     const handleDeleteSelected = async () => {
         try {
-            const url = url_item + `/deleteTransport`;
+            const url = urls[2] || '';
             const access_token = localStorage.getItem('access_token_Request');
             if (access_token) {
-                const idsToDelete = selectedItems.map(item => item.userHasProfile);
+                const idsToDelete = selectedItems.map(item => item.userID);
                 for (const idToDelete of idsToDelete) {
                     const config = {
                         access_token: access_token,
-                        userHasProfile: idToDelete,
+                        userID: idToDelete,
                         organizationID: id,
                     }
-
                     const response = await DeleteRequest(url, config);
+                    console.log(response);
                     OptionMessage(response);
                 }
             }
@@ -206,7 +149,7 @@ const UsersCRUD: React.FC = () => {
         e.preventDefault();
         try {
 
-            const url = url_item + `/registerUser`;
+            const url = urls[3] || '';
             const access_token = localStorage.getItem('access_token_Request');
             if (access_token) {
 
@@ -230,30 +173,7 @@ const UsersCRUD: React.FC = () => {
         }
     };
 
-    const handleSubmit = async (event: React.FormEvent) => {
-        event.preventDefault();
-        if (updateId !== null) {
-            await handleUpdate();
-        } else {
-            await handleCreate();
-        }
-    };
-
-    const handleEdit = (item: Item) => {
-        setNewItem({
-            userHasProfile: item.userHasProfile,
-            userID: item.userID,
-            profileID: item.profileID,
-            roles: '',
-            name: '',
-            lastName: '',
-            email: ''
-        });
-        openLoginModal();
-    };
-
     const clearItem = () => {
-        setUpdateId(null);
         setNewItem({
             userHasProfile: 0,
             userID: '',
@@ -261,7 +181,12 @@ const UsersCRUD: React.FC = () => {
             roles: '',
             name: '',
             lastName: '',
-            email: ''
+            email: '',
+            ornganizationname: '',
+            organizationID: 0
+        });
+        setProfile({
+            profileIDs: [],
         });
     }
 
@@ -275,7 +200,7 @@ const UsersCRUD: React.FC = () => {
             setSelectedItems(prevSelectedItems => [...prevSelectedItems, item]);
         } else {
             setSelectedItems(prevSelectedItems =>
-                prevSelectedItems.filter(selectedItem => selectedItem.userHasProfile !== item.userHasProfile)
+                prevSelectedItems.filter(selectedItem => selectedItem.userID !== item.userID)
             );
         }
     };
@@ -300,12 +225,16 @@ const UsersCRUD: React.FC = () => {
             setMessageError(data.error);
         }
         else if (data.message) {
-            if (data.message == "Se actualizo el peso máximo con éxito" || data.message == "Se ha eliminado el transporte exitosamente" ||
-                data.message == "se ha agregado el transporte a la empresa exitosamente" ||
-                data.message == "Usuario nuevo invitado") {
+            if (data.message == "Se eliminaron todos los perfiles del usuario en la empresa" ||
+                data.message == "Perfil de usuario agregado" ||
+                data.message == "Usuario nuevo invitado" ||
+                data.message == "Se creo el perfil de usuario exitosamente" ||
+                data.message == "se eliminaron los usuarios de la empresa exitosamente"
+            ) {
                 setMessageVerification(data.message);
                 fetchItems();
                 closeModal();
+                return;
             }
             setMessageError(data.message);
         } else if (data.errors) {
@@ -318,16 +247,78 @@ const UsersCRUD: React.FC = () => {
     };
 
     // -------------------------------Funciones para la Paginacion-------------------------------
-    const getCurrentPageItems = () => {
-        if (!Array.isArray(items)) {
-            return [];
-        }
 
+    const [searchType, setSearchType] = useState<'userID' | 'name' | 'lastName' | 'email'>('userID');
+    const [searchTerm, setSearchTerm] = useState<string>('');
+
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+    const [sortProperty, setSortProperty] = useState<'userID' | 'name' | 'lastName' | 'email'>('userID');
+
+    const getCurrentPageItems = () => {
         const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
         const endIndex = startIndex + ITEMS_PER_PAGE;
 
-        return items.slice(startIndex, endIndex);
+        // Filtrar y ordenar los elementos según el término de búsqueda y el tipo de búsqueda seleccionado
+        const filteredItems = filterItems(items);
+
+        // Ordenar los elementos según la dirección de ordenamiento y la propiedad seleccionada
+        const sortedItems = sortItems(filteredItems);
+
+        return sortedItems.slice(startIndex, endIndex);
     };
+
+    const handleSortPropertyChange = (property: 'userID' | 'name' | 'lastName' | 'email') => {
+        // Si el usuario selecciona una nueva propiedad de ordenamiento, pero es diferente a la propiedad actual,
+        // establecer la dirección de ordenamiento en "asc" (ascendente)
+        if (property !== sortProperty) {
+            setSortDirection('asc');
+        }
+        // Si el usuario selecciona una nueva propiedad de ordenamiento y es la misma que la propiedad actual,
+        // alternar la dirección de ordenamiento entre "asc" y "desc"
+        else {
+            setSortDirection((prevDirection) => (prevDirection === 'asc' ? 'desc' : 'asc'));
+        }
+
+        // Establecer la nueva propiedad de ordenamiento seleccionada
+        setSortProperty(property);
+    };
+
+    // Filtrar y ordenar los elementos según el término de búsqueda y el tipo de búsqueda seleccionado
+    const filterItems = (items: Item[]) => {
+        if (!items) {
+            return [];
+        }
+
+        return items.filter((item) => {
+            const propValue = item[searchType];
+
+            if (propValue !== undefined && typeof propValue === 'string') {
+                return propValue.toLowerCase().includes(searchTerm.toLowerCase());
+            }
+
+            return false;
+        });
+    }
+
+    // Ordenar los elementos según la dirección de ordenamiento y la propiedad seleccionada
+    const sortItems = (items: Item[]) => {
+        return items.sort((a, b) => {
+            const propA = a[sortProperty];
+            const propB = b[sortProperty];
+
+            if (propA !== undefined && propB !== undefined) {
+                if (typeof propA === 'string' && typeof propB === 'string') {
+                    return sortDirection === 'asc' ? propA.localeCompare(propB) : propB.localeCompare(propA);
+                }
+
+                if (typeof propA === 'number' && typeof propB === 'number') {
+                    return sortDirection === 'asc' ? propA - propB : propB - propA;
+                }
+            }
+
+            return 0;
+        });
+    }
 
     const handlePrevPage = () => {
         setCurrentPage(prevPage => prevPage - 1);
@@ -414,11 +405,11 @@ const UsersCRUD: React.FC = () => {
 
             <ModalCRUD isOpen={ModalOpen}>
                 <div className="mx-auto mt-10 max-w-screen items-center px-6 sm:px-8">
-                    <form onSubmit={handleSubmit} className="mb-0 mt-6 space-y-4 rounded-lg p-4 sm:p-6 lg:p-8">
+                    <form onSubmit={handleCreate} className="mb-0 mt-6 space-y-4 rounded-lg p-4 sm:p-6 lg:p-8">
 
                         <div className="mx-auto max-w-lg text-center">
                             <h1 className="text-2xl font-bold sm:text-3xl">
-                                {updateId ? `Editar ${itemName}` : `Crear ${itemName}`}
+                                Crear {itemName}
                             </h1>
 
                             <h2 className="text-center text-lg font-medium">
@@ -458,13 +449,14 @@ const UsersCRUD: React.FC = () => {
                                 </span>
                             </div>
 
-                            <div className="flex flex-col items-center mt-4 gap-2 sm:flex-row sm:justify-center">
+                            <div className="flex flex-col items-center mt-4 gap-2 sm:gap-8 sm:flex-row sm:justify-center">
 
-                                <div className="flex gap-2 sm:gap-14">
 
-                                    <label htmlFor="HeadlineAct" className="text-sm text-gray-700">
-                                        Seleccione Rol
-                                    </label>
+                                <label htmlFor="HeadlineAct" className="text-sm text-gray-700">
+                                    Seleccione Rol
+                                </label>
+
+                                <div className="flex gap-8">
 
                                     <div className='space-x-2'>
                                         <input
@@ -509,57 +501,39 @@ const UsersCRUD: React.FC = () => {
 
                         <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-center">
 
-                            <CustomButton onClick={handleSubmit} type="submit"
-                                color="indigo"
-                                padding_x="12"
-                                padding_smx="12"
-                                padding_mdx="12"
-                                padding_y="2.5"
-                                width="32"
-                                height="10"
-                            >
-                                {!updateId && (
+                            <div className="flex-1 w-80 sm:w-36">
+                                <CustomButton type="submit"
+                                    color="indigo"
+                                    padding_x="2"
+                                    padding_smx="2"
+                                    padding_mdx="2"
+                                    padding_y="2.5"
+                                    width="full"
+                                    height="10"
+                                >
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                )}
+                                    Crear {itemName}
+                                </CustomButton>
+                            </div>
 
-                                {updateId && (
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        strokeWidth="1.5"
-                                        stroke="currentColor"
-                                        className="h-6 w-6"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
-                                        />
+                            <div className="flex-1 w-80 sm:w-36">
+                                <CustomButton onClick={closeModal} type="button"
+                                    color="red"
+                                    padding_x="4"
+                                    padding_smx="4"
+                                    padding_mdx="4"
+                                    padding_y="2.5"
+                                    width="full"
+                                    height="10"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                )}
-
-                                {updateId ? `Editar ${itemName}` : `Crear ${itemName}`}
-                            </CustomButton>
-
-                            <CustomButton onClick={closeModal} type="button"
-                                color="red"
-                                padding_x="20"
-                                padding_smx="20"
-                                padding_mdx="20"
-                                padding_y="2.5"
-                                width="32"
-                                height="10"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-
-                                Cancelar
-
-                            </CustomButton>
+                                    Cancelar
+                                </CustomButton>
+                            </div>
 
                         </div>
                     </form>
@@ -572,11 +546,11 @@ const UsersCRUD: React.FC = () => {
 
                         <div className="mx-auto max-w-lg text-center">
                             <h1 className="text-2xl font-bold sm:text-3xl">
-                                {updateId ? `Editar ${itemName}` : `Crear ${itemName}`}
+                                Invitacion a {name}
                             </h1>
 
                             <h2 className="text-center text-lg font-medium">
-                                Invitacion de Usuario para {name}
+                                Invitacion como chofer
                             </h2>
 
                             <p className="mx-auto mt-4 max-w-md text-center text-gray-500">
@@ -672,38 +646,43 @@ const UsersCRUD: React.FC = () => {
 
                         <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-center">
 
-                            <CustomButton type="submit"
-                                color="indigo"
-                                padding_x="12"
-                                padding_smx="12"
-                                padding_mdx="12"
-                                padding_y="2.5"
-                                width="32"
-                                height="10"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
+                            <div className="flex-1 w-80 sm:w-36">
+                                <CustomButton type="submit"
+                                    color="indigo"
+                                    padding_x="0"
+                                    padding_smx="0"
+                                    padding_mdx="0"
+                                    padding_y="2.5"
+                                    width="full"
+                                    height="10"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
 
-                                Invitar {itemName}
-                            </CustomButton>
+                                    Invitar Usuario
+                                </CustomButton>
+                            </div>
 
-                            <CustomButton onClick={closeInviteModal} type="button"
-                                color="red"
-                                padding_x="20"
-                                padding_smx="20"
-                                padding_mdx="20"
-                                padding_y="2.5"
-                                width="32"
-                                height="10"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
+                            <div className="flex-1 w-80 sm:w-36">
 
-                                Cancelar
+                                <CustomButton onClick={closeInviteModal} type="button"
+                                    color="red"
+                                    padding_x="0"
+                                    padding_smx="0"
+                                    padding_mdx="0"
+                                    padding_y="2.5"
+                                    width="full"
+                                    height="10"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
 
-                            </CustomButton>
+                                    Cancelar
+
+                                </CustomButton>
+                            </div>
 
                         </div>
                     </form>
@@ -712,30 +691,66 @@ const UsersCRUD: React.FC = () => {
 
             <div className=' bg-gray-100 min-h-screen pt-3 mx-2'>
 
-                <div className='flex flex-col items-center gap-2 sm:flex-row sm:justify-center'>
+                <div className='flex'>
 
-                    <CustomButton onClick={openInviteModal} type="button"
-                        color="indigo"
-                        padding_x="8"
-                        padding_smx="8"
-                        padding_mdx="8"
-                        padding_y="2"
-                        width="64"
-                        height="15"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Invitar {itemName}
-                    </CustomButton>
+                    <div className='flex-1'>
+                        <div className="relative z-1">
+                            <label htmlFor="Search" className="sr-only">
+                                Search
+                            </label>
+
+                            <input
+                                type="text"
+                                placeholder="Buscar..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full rounded-md border-gray-200 py-2.5 pl-10 pr-3 shadow-sm sm:text-sm"
+                            />
+
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                strokeWidth="1.5"
+                                stroke="currentColor"
+                                className="h-4 w-4 absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+                                />
+                            </svg>
+                        </div>
+                    </div>
+
+
+                    <div className='flex-2'>
+                        <select
+                            className="h-12 w-full rounded-lg border-gray-300 text-gray-700 text-sm"
+                            value={searchType}
+                            onChange={(e) => setSearchType(e.target.value as
+                                'userID' | 'name' | 'lastName' | 'email'
+                            )}
+                        >
+                            <option value="userID">ID del Usuario</option>
+                            <option value="name">Nombre del Usuario</option>
+                            <option value="lastName">Apellido del Usuario</option>
+                            <option value="email">Email del Usuario</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div className='flex justify-center gap-1 sm:gap-2 mt-2'>
 
                     <CustomButton onClick={openLoginModal} type="button"
                         color="indigo"
-                        padding_x="8"
+                        padding_x="3"
                         padding_smx="8"
-                        padding_mdx="8"
+                        padding_mdx="12"
                         padding_y="2"
-                        width="64"
+                        width="60"
                         height="15"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
@@ -744,13 +759,42 @@ const UsersCRUD: React.FC = () => {
                         Crear {itemName}
                     </CustomButton>
 
+                    <CustomButton onClick={openInviteModal} type="button"
+                        color="indigo"
+                        padding_x="2"
+                        padding_smx="2"
+                        padding_mdx="2"
+                        padding_y="2"
+                        width="10"
+                        height="15"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                        </svg>
+
+                    </CustomButton>
+
+                    <CustomButton onClick={fetchItems} type="button"
+                        color="indigo"
+                        padding_x="2"
+                        padding_smx="2"
+                        padding_mdx="2"
+                        padding_y="2"
+                        width="10"
+                        height="15"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                        </svg>
+                    </CustomButton>
+
                     <CustomButton onClick={handleDeleteSelected} type="button"
                         color="red"
-                        padding_x="8"
+                        padding_x="3"
                         padding_smx="8"
-                        padding_mdx="8"
+                        padding_mdx="12"
                         padding_y="2"
-                        width="64"
+                        width="60"
                         height="15"
                     >
                         <svg
@@ -759,7 +803,7 @@ const UsersCRUD: React.FC = () => {
                             viewBox="0 0 24 24"
                             strokeWidth="1.5"
                             stroke="currentColor"
-                            className="h-4 w-4"
+                            className="h-5 w-5"
                         >
                             <path
                                 strokeLinecap="round"
@@ -789,15 +833,99 @@ const UsersCRUD: React.FC = () => {
                                 </th>
 
                                 <th className="text-start whitespace-nowrap px-4 py-2 font-medium text-gray-900">
-                                    ID de la {itemName}
+                                    <div className='flex items-center gap-1'>
+                                        ID del Usuario
+                                        <button onClick={() => handleSortPropertyChange('userID')}>
+
+                                            {sortProperty === 'userID' ? (
+                                                sortDirection === 'asc' ? (
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 11.25l-3-3m0 0l-3 3m3-3v7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                ) : (
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75l3 3m0 0l3-3m-3 3v-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                )
+                                            ) : (
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+
+                                            )}
+                                        </button>
+
+                                    </div>
                                 </th>
 
                                 <th className="text-start whitespace-nowrap px-4 py-2 font-medium text-gray-900">
-                                    Nombre Completo
+                                    <div className='flex items-center gap-1'>
+                                        Nombre Completo del Usuario
+                                        <button onClick={() => handleSortPropertyChange('name')}>
+
+                                            {sortProperty === 'name' ? (
+                                                sortDirection === 'asc' ? (
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 11.25l-3-3m0 0l-3 3m3-3v7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                ) : (
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75l3 3m0 0l3-3m-3 3v-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                )
+                                            ) : (
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+
+                                            )}
+                                        </button>
+                                        <button onClick={() => handleSortPropertyChange('lastName')}>
+
+                                            {sortProperty === 'lastName' ? (
+                                                sortDirection === 'asc' ? (
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 11.25l-3-3m0 0l-3 3m3-3v7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                ) : (
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75l3 3m0 0l3-3m-3 3v-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                )
+                                            ) : (
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+
+                                            )}
+                                        </button>
+                                    </div>
                                 </th>
 
                                 <th className="text-start whitespace-nowrap px-4 py-2 font-medium text-gray-900">
-                                    Email
+                                    <div className='flex items-center gap-1'>
+                                        ID de la {itemName}
+                                        <button onClick={() => handleSortPropertyChange('email')}>
+
+                                            {sortProperty === 'email' ? (
+                                                sortDirection === 'asc' ? (
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 11.25l-3-3m0 0l-3 3m3-3v7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                ) : (
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75l3 3m0 0l3-3m-3 3v-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                )
+                                            ) : (
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+
+                                            )}
+                                        </button>
+
+                                    </div>
                                 </th>
 
                                 <th className="text-start whitespace-nowrap px-4 py-2 font-medium text-gray-900">
@@ -865,33 +993,7 @@ const UsersCRUD: React.FC = () => {
 
 
                                     <td className="px-4 py-2">
-
-                                        <Link href={`/Organization/User/${item.userID}?name=${encodeURIComponent(item.name)}`}>
-                                            <CustomButton type="button"
-                                                color="indigo"
-                                                padding_x="4"
-                                                padding_smx="4"
-                                                padding_mdx="4"
-                                                padding_y="2"
-                                                width="32"
-                                                height="10"
-                                            >
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    fill="none"
-                                                    viewBox="0 0 24 24"
-                                                    strokeWidth="1.5"
-                                                    stroke="currentColor"
-                                                    className="h-4 w-4"
-                                                >
-                                                    <path strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
-
-                                                </svg>
-                                                Editar Roles
-                                            </CustomButton>
-                                        </Link>
+                                        <RoleCRUD urls={urlsRole} id={item.userID} OrganizacionID={item.organizationID} name={item.ornganizationname} />
                                     </td>
 
                                 </tr>
@@ -951,9 +1053,9 @@ const UsersCRUD: React.FC = () => {
 
                 </div>
 
-            </div>
+            </div >
 
-        </div>
+        </div >
     );
 };
 

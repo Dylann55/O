@@ -25,10 +25,10 @@ const Alert: React.FC<AlertProps> = ({ message, onClose }) => {
     >
       <div
         role="alert"
-        className="fixed top-0 right-0 m-4 rounded border-red-500 bg-red-50 p-4
+        className="fixed top-0 right-0 m-4 rounded text-red-700 bg-red-100 p-4
       transition-transform duration-300 hover:scale-110 hover:shadow-xl focus:outline-none focus:ring"
       >
-        <div className="flex items-center gap-2 text-red-800">
+        <div className="flex items-center gap-2 font-bold">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -45,7 +45,7 @@ const Alert: React.FC<AlertProps> = ({ message, onClose }) => {
           <strong className="block font-medium">Mensaje de Error</strong>
         </div>
 
-        <p className="mt-2 text-sm text-red-700">{message}</p>
+        <p className="mt-2 text-sm">{message}</p>
       </div>
     </div>
   );

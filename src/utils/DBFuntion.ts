@@ -23,7 +23,7 @@ class SupaBaseChangePassword extends UpdatePassword {
 
 class AuthState {
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor, @typescript-eslint/no-empty-function
-  constructor() {}
+  constructor() { }
 
   startListening(): void {
     throw new Error('startListening method not implemented');
@@ -51,7 +51,7 @@ class SupaBaseAuthState extends AuthState {
 
 class AuthStateSocial {
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor, @typescript-eslint/no-empty-function
-  constructor() {}
+  constructor() { }
 
   checkSessionSocial(): void {
     throw new Error('checkSessionSocial method not implemented');
@@ -93,16 +93,34 @@ class SupaBaseAuthStateSocial extends AuthStateSocial {
             const data = await fetchDataWithConfig(url, config);
             console.log(data);
           }
-          window.location.reload();
+          window.location.href = '/Organization/MyOrganizations';
         }
       });
     }
   }
 }
 
+class RefreshSession {
+  async refreshSession(): Promise<void> {
+    throw new Error('startListening method not implemented');
+  }
+}
+
+class SupaBaseRefreshSession extends RefreshSession {
+
+  async refreshSession(): Promise<any> {
+    const { data, error } = await createClient.auth.refreshSession();
+    if (error) {
+      return null;
+    }
+    const { session } = data;
+    return session;
+  }
+}
+
 class SignOut {
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor, @typescript-eslint/no-empty-function
-  constructor() {}
+  constructor() { }
 
   signOut(): Promise<void> {
     throw new Error('startListening method not implemented');
@@ -125,4 +143,5 @@ export {
   SupaBaseAuthStateSocial as AuthStateSocial,
   SupaBaseSignOut as SignOut,
   SupaBaseChangePassword as UpdatePassword,
+  SupaBaseRefreshSession as RefreshSession,
 };

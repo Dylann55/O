@@ -49,8 +49,6 @@ const OrganizationCRUD: React.FC<OrganizationCRUDProps> = ({ urls }) => {
         const config = {
           access_token: access_token,
         }
-
-        //const response = await ReadRequestS("organization");
         const response = await ReadRequest(url, config);
 
         if (response.data && Array.isArray(response.data)) {
@@ -65,7 +63,7 @@ const OrganizationCRUD: React.FC<OrganizationCRUDProps> = ({ urls }) => {
           clearCheckbox();
 
         } else {
-          setMessageError("Error Durante la Busqueda");
+          setMessageError(response.error);
         }
       }
       else {
@@ -85,7 +83,6 @@ const OrganizationCRUD: React.FC<OrganizationCRUDProps> = ({ urls }) => {
       if (access_token) {
         const Item = { ...newItem, access_token: access_token };
         const response = await CreateRequest(url, Item);
-        console.log(response);
         OptionMessage(response);
       }
       else {
@@ -201,6 +198,7 @@ const OrganizationCRUD: React.FC<OrganizationCRUDProps> = ({ urls }) => {
         setMessageVerification(data.message);
         fetchItems();
         closeModal();
+        return;
       }
       setMessageError(data.message);
     } else if (data.errors) {
@@ -226,6 +224,7 @@ const OrganizationCRUD: React.FC<OrganizationCRUDProps> = ({ urls }) => {
         setMessageVerification(data.message);
         fetchItems();
         closeModal();
+        return;
       }
       setMessageError(data.message);
     }
@@ -240,12 +239,81 @@ const OrganizationCRUD: React.FC<OrganizationCRUDProps> = ({ urls }) => {
   };
 
   // -------------------------------Funciones para la Paginacion-------------------------------
+  const [searchType, setSearchType] = useState<'organizationID' | 'name'>('organizationID');
+  const [searchTerm, setSearchTerm] = useState<string>('');
+
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [sortProperty, setSortProperty] = useState<'organizationID' | 'name'>('organizationID');
+
   const getCurrentPageItems = () => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
 
-    return items.slice(startIndex, endIndex);
+    // Filtrar y ordenar los elementos según el término de búsqueda y el tipo de búsqueda seleccionado
+    const filteredItems = filterItems(items);
+
+    // Ordenar los elementos según la dirección de ordenamiento y la propiedad seleccionada
+    const sortedItems = sortItems(filteredItems);
+
+    return sortedItems.slice(startIndex, endIndex);
   };
+
+  const handleSortPropertyChange = (property: 'organizationID' | 'name') => {
+    // Si el usuario selecciona una nueva propiedad de ordenamiento, pero es diferente a la propiedad actual,
+    // establecer la dirección de ordenamiento en "asc" (ascendente)
+    if (property !== sortProperty) {
+      setSortDirection('asc');
+    }
+    // Si el usuario selecciona una nueva propiedad de ordenamiento y es la misma que la propiedad actual,
+    // alternar la dirección de ordenamiento entre "asc" y "desc"
+    else {
+      setSortDirection((prevDirection) => (prevDirection === 'asc' ? 'desc' : 'asc'));
+    }
+
+    // Establecer la nueva propiedad de ordenamiento seleccionada
+    setSortProperty(property);
+  };
+
+  // Filtrar y ordenar los elementos según el término de búsqueda y el tipo de búsqueda seleccionado
+  const filterItems = (items: Item[]) => {
+    if (!items) {
+      return [];
+    }
+
+    return items.filter((item) => {
+      const propValue = item[searchType];
+
+      if (propValue !== undefined && typeof propValue === 'string') {
+        return propValue.toLowerCase().includes(searchTerm.toLowerCase());
+      }
+
+      if (propValue !== undefined && typeof propValue === 'number') {
+        return propValue.toString().includes(searchTerm);
+      }
+
+      return false;
+    });
+  }
+
+  // Ordenar los elementos según la dirección de ordenamiento y la propiedad seleccionada
+  const sortItems = (items: Item[]) => {
+    return items.sort((a, b) => {
+      const propA = a[sortProperty];
+      const propB = b[sortProperty];
+
+      if (propA !== undefined && propB !== undefined) {
+        if (typeof propA === 'string' && typeof propB === 'string') {
+          return sortDirection === 'asc' ? propA.localeCompare(propB) : propB.localeCompare(propA);
+        }
+
+        if (typeof propA === 'number' && typeof propB === 'number') {
+          return sortDirection === 'asc' ? propA - propB : propB - propA;
+        }
+      }
+
+      return 0;
+    });
+  }
 
   const handlePrevPage = () => {
     setCurrentPage(prevPage => prevPage - 1);
@@ -256,7 +324,6 @@ const OrganizationCRUD: React.FC<OrganizationCRUDProps> = ({ urls }) => {
   };
 
   // -------------------------------Funciones de Extra-------------------------------
-
   useEffect(() => {
 
     const obtenerTokenDeAcceso = async () => {
@@ -364,66 +431,116 @@ const OrganizationCRUD: React.FC<OrganizationCRUDProps> = ({ urls }) => {
 
             <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-center">
 
-              <CustomButton onClick={handleSubmit} type="submit"
-                color="indigo"
-                padding_x="12"
-                padding_smx="12"
-                padding_mdx="12"
-                padding_y="2.5"
-                width="32"
-                height="10"
-              >
-                {!updateId && (
+              <div className="flex-1 w-80 sm:w-42">
+                <CustomButton onClick={handleSubmit} type="submit"
+                  color="indigo"
+                  padding_x="0"
+                  padding_smx="0"
+                  padding_mdx="0"
+                  padding_y="2.5"
+                  width="full"
+                  height="10"
+                >
+                  {!updateId && (
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  )}
+
+                  {updateId && (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth="1.5"
+                      stroke="currentColor"
+                      className="h-6 w-6"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
+                      />
+                    </svg>
+                  )}
+
+                  {updateId ? `Editar ${itemName}` : `Crear ${itemName}`}
+                </CustomButton>
+              </div>
+              <div className="flex-1 w-80 sm:w-36">
+                <CustomButton onClick={closeModal} type="button"
+                  color="red"
+                  padding_x="0"
+                  padding_smx="0"
+                  padding_mdx="0"
+                  padding_y="2.5"
+                  width="full"
+                  height="10"
+                >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                )}
 
-                {updateId && (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                    className="h-6 w-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
-                    />
-                  </svg>
-                )}
+                  Cancelar
 
-                {updateId ? `Editar ${itemName}` : `Crear ${itemName}`}
-              </CustomButton>
-
-              <CustomButton onClick={closeModal} type="button"
-                color="red"
-                padding_x="20"
-                padding_smx="20"
-                padding_mdx="20"
-                padding_y="2.5"
-                width="32"
-                height="10"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-
-                Cancelar
-
-              </CustomButton>
-
+                </CustomButton>
+              </div>
             </div>
           </form>
         </div>
       </ModalCRUD>
 
+
       <div className=' bg-gray-100 min-h-screen pt-3 mx-2'>
 
-        <div className='flex justify-center gap-6 mt-2'>
+        <div className='flex'>
+
+          <div className='flex-1'>
+            <div className="relative z-1">
+              <label htmlFor="Search" className="sr-only">
+                Search
+              </label>
+
+              <input
+                type="text"
+                placeholder="Buscar..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full rounded-md border-gray-200 py-2.5 pl-10 pr-3 shadow-sm sm:text-sm"
+              />
+
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+                className="h-4 w-4 absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+                />
+              </svg>
+            </div>
+          </div>
+
+
+          <div className='flex-2'>
+            <select
+              className="h-12 w-full rounded-lg border-gray-300 text-gray-700 text-sm"
+              value={searchType}
+              onChange={(e) => setSearchType(e.target.value as 'organizationID' | 'name')}
+            >
+              <option value="organizationID">ID de la {itemName}</option>
+              <option value="name">Nombre de la {itemName}</option>
+            </select>
+          </div>
+
+        </div>
+
+        <div className='flex justify-center gap-2 mt-2'>
 
           <CustomButton onClick={openLoginModal} type="button"
             color="indigo"
@@ -431,7 +548,7 @@ const OrganizationCRUD: React.FC<OrganizationCRUDProps> = ({ urls }) => {
             padding_smx="8"
             padding_mdx="12"
             padding_y="2"
-            width="32"
+            width="18"
             height="15"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
@@ -440,13 +557,27 @@ const OrganizationCRUD: React.FC<OrganizationCRUDProps> = ({ urls }) => {
             Crear {itemName}
           </CustomButton>
 
+          <CustomButton onClick={fetchItems} type="button"
+            color="indigo"
+            padding_x="2"
+            padding_smx="2"
+            padding_mdx="2"
+            padding_y="0"
+            width="10"
+            height="15"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+            </svg>
+          </CustomButton>
+
           <CustomButton onClick={handleDeleteSelected} type="button"
             color="red"
             padding_x="3"
             padding_smx="8"
             padding_mdx="12"
             padding_y="2"
-            width="32"
+            width="18"
             height="15"
           >
             <svg
@@ -455,7 +586,7 @@ const OrganizationCRUD: React.FC<OrganizationCRUDProps> = ({ urls }) => {
               viewBox="0 0 24 24"
               strokeWidth="1.5"
               stroke="currentColor"
-              className="h-4 w-4"
+              className="h-5 w-5"
             >
               <path
                 strokeLinecap="round"
@@ -485,11 +616,55 @@ const OrganizationCRUD: React.FC<OrganizationCRUDProps> = ({ urls }) => {
                 </th>
 
                 <th className="text-start whitespace-nowrap px-4 py-2 font-medium text-gray-900">
-                  ID de la {itemName}
+                  <div className='flex items-center gap-1'>
+                    ID de la {itemName}
+                    <button onClick={() => handleSortPropertyChange('organizationID')}>
+
+                      {sortProperty === 'organizationID' ? (
+                        sortDirection === 'asc' ? (
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 11.25l-3-3m0 0l-3 3m3-3v7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75l3 3m0 0l3-3m-3 3v-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        )
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+
+                      )}
+                    </button>
+
+                  </div>
                 </th>
 
                 <th className="text-start whitespace-nowrap px-4 py-2 font-medium text-gray-900">
-                  Nombre de la {itemName}
+                  <div className='flex items-center gap-1'>
+                    Nombre de la {itemName}
+                    <button onClick={() => handleSortPropertyChange('name')}>
+                      {sortProperty === 'name' ? (
+                        sortDirection === 'asc' ? (
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 11.25l-3-3m0 0l-3 3m3-3v7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75l3 3m0 0l3-3m-3 3v-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+
+                        )
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+
+                      )}
+                    </button>
+                  </div>
                 </th>
 
                 <th className="text-center whitespace-nowrap px-4 py-2 font-medium text-gray-900">
