@@ -15,7 +15,7 @@ interface Item {
   lastName: string;
 }
 
-const url_item = process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage';
+const url_item = process.env.NEXT_PUBLIC_MIDDLE_URL;
 
 const ProfileCRUD: React.FC = () => {
 
@@ -35,7 +35,7 @@ const ProfileCRUD: React.FC = () => {
 
   const fetchItems = async () => {
     try {
-      const url = url_item + `/myUserData`;
+      const url = url_item + `/users/data`;
 
       const access_token = localStorage.getItem('access_token_Request');
 
@@ -44,12 +44,7 @@ const ProfileCRUD: React.FC = () => {
           access_token: access_token,
         }
         const response = await ReadRequest(url, config);
-        if (!response.error) {
-          setItems(response.data);
-        }
-        else {
-          setMessageError(response.error.message);
-        }
+        setItems([response]);
       }
       else {
         setMessageError("Expiro la Session")
@@ -63,7 +58,7 @@ const ProfileCRUD: React.FC = () => {
   const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const url = url_item + `/updateMyUser`;
+      const url = url_item + `/users/data`;
       const access_token = localStorage.getItem('access_token_Request');
 
       if (access_token) {

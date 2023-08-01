@@ -1,6 +1,6 @@
 {
-  "name": "next-js-boilerplate",
-  "version": "3.6.0",
+  "name": "overonce",
+  "version": "0.2",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -24,6 +24,7 @@
     "@headlessui/react": "^1.7.6",
     "@heroicons/react": "^2.0.13",
     "@material-design-icons/svg": "^0.14.2",
+    "@react-google-maps/api": "^2.19.2",
     "@supabase/auth-helpers-nextjs": "^0.5.2",
     "@supabase/auth-helpers-react": "^0.3.1",
     "@supabase/auth-ui-react": "^0.2.6",
@@ -53,6 +54,7 @@
     "@testing-library/react": "^13.4.0",
     "@types/alpinejs": "^3.7.1",
     "@types/chai": "^4.3.5",
+    "@types/googlemaps": "^3.43.3",
     "@types/jest": "^29.2.3",
     "@types/jsonwebtoken": "^9.0.2",
     "@types/mocha": "^10.0.1",

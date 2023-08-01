@@ -5,24 +5,34 @@ import AlertVerification from '../Widgets/AlertVerification';
 
 import { ReadRequest } from '@/utils/CRUD';
 import { getSession } from '@/utils/LocalStorage';
+import Link from 'next/link';
+import CustomButton from '../Widgets/Button/CustomButton';
 
 interface Item {
     userHasProfile: number;
     userID: string;
     profileID: number;
     roles: string;
-    ornganizationname: string;
+    organizationname: string;
     organizationID: number;
 }
 
 const ITEMS_PER_PAGE = 30; // Numero de elementos a mostrar por pagina
-const url_item = process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage';
 
-const MyProfilesCRUD: React.FC = () => {
+interface MyProfilesCRUDProps {
+    urls: string[];
+    title: string;
+    subtitle: string;
+    role: boolean;
+}
+
+const MyProfilesCRUD: React.FC<MyProfilesCRUDProps> = ({ urls, title, subtitle, role }) => {
 
     const [itemName] = useState<string>('Usuario');
 
     const [items, setItems] = useState<Item[]>([]);
+
+    const [isChofer] = useState<boolean>(role);
 
     const [currentPage, setCurrentPage] = useState(1);
     const totalPages = Math.ceil(items.length / ITEMS_PER_PAGE);
@@ -31,7 +41,7 @@ const MyProfilesCRUD: React.FC = () => {
 
     const fetchItems = async () => {
         try {
-            const url = url_item + `/listMyParticipation`;
+            const url = urls[0] || '';
 
             const access_token = localStorage.getItem('access_token_Request');
 
@@ -57,11 +67,11 @@ const MyProfilesCRUD: React.FC = () => {
     };
 
     // -------------------------------Funciones para la Paginacion-------------------------------
-    const [searchType, setSearchType] = useState<'organizationID' | 'ornganizationname'>('organizationID');
+    const [searchType, setSearchType] = useState<'organizationID' | 'organizationname'>('organizationID');
     const [searchTerm, setSearchTerm] = useState<string>('');
 
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-    const [sortProperty, setSortProperty] = useState<'organizationID' | 'ornganizationname'>('organizationID');
+    const [sortProperty, setSortProperty] = useState<'organizationID' | 'organizationname'>('organizationID');
 
     const getCurrentPageItems = () => {
         const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -76,7 +86,7 @@ const MyProfilesCRUD: React.FC = () => {
         return sortedItems.slice(startIndex, endIndex);
     };
 
-    const handleSortPropertyChange = (property: 'organizationID' | 'ornganizationname') => {
+    const handleSortPropertyChange = (property: 'organizationID' | 'organizationname') => {
         // Si el usuario selecciona una nueva propiedad de ordenamiento, pero es diferente a la propiedad actual,
         // establecer la dirección de ordenamiento en "asc" (ascendente)
         if (property !== sortProperty) {
@@ -92,7 +102,6 @@ const MyProfilesCRUD: React.FC = () => {
         setSortProperty(property);
     };
 
-    // Filtrar y ordenar los elementos según el término de búsqueda y el tipo de búsqueda seleccionado
     // Filtrar y ordenar los elementos según el término de búsqueda y el tipo de búsqueda seleccionado
     const filterItems = (items: Item[]) => {
         if (!items) {
@@ -191,11 +200,24 @@ const MyProfilesCRUD: React.FC = () => {
 
             </div>
 
-            <div className=' bg-gray-100 min-h-screen pt-3 mx-2'>
+            <div className='min-h-screen mx-6 my-2'>
 
-                <div className='flex'>
+                <div className="flex flex-col items-center gap-2 md:flex-row md:justify-between mb-4">
 
-                    <div className='flex-1'>
+                    <div className='text-center md:text-start'>
+                        <h1 className="text-2xl sm:text-3xl font-semibold leading-relaxed text-gray-900">
+                            {title}
+                        </h1>
+                        <p className="text-md sm:text-sm font-medium text-gray-500">
+                            {subtitle}
+                        </p>
+                    </div>
+
+                </div>
+
+                <div className='flex flex-col items-center gap-2 sm:flex-row'>
+
+                    <div className='flex-1 w-full sm:w-auto'>
                         <div className="relative z-1">
                             <label htmlFor="Search" className="sr-only">
                                 Search
@@ -227,30 +249,30 @@ const MyProfilesCRUD: React.FC = () => {
                     </div>
 
 
-                    <div className='flex-2'>
+                    <div className='flex-2 w-full sm:w-auto'>
                         <select
                             className="h-12 w-full rounded-lg border-gray-300 text-gray-700 text-sm"
                             value={searchType}
                             onChange={(e) => setSearchType(e.target.value as
-                                'organizationID' | 'ornganizationname'
+                                'organizationID' | 'organizationname'
                             )}
                         >
                             <option value="organizationID">ID de la Organizacion</option>
-                            <option value="ornganizationname">Nombre de la Organizacion</option>
+                            <option value="organizationname">Nombre de la Organizacion</option>
                         </select>
                     </div>
 
                 </div>
 
-                <div className="mx-2 sm:mx-4 overflow-x-auto">
+                <div className="overflow-x-auto">
 
-                    <table className="min-w-full divide-y-2 divide-gray-200 bg-white text-center text-sm mt-4">
+                    <table className="min-w-full divide-y-2 divide-gray-200 bg-white text-sm mt-4">
 
                         <thead>
                             <tr>
 
                                 <th className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
-                                    <div className='flex items-center gap-1'>
+                                    <div className='flex items-center justify-center gap-1'>
                                         ID de la Organizacion
                                         <button onClick={() => handleSortPropertyChange('organizationID')}>
 
@@ -276,11 +298,11 @@ const MyProfilesCRUD: React.FC = () => {
                                 </th>
 
                                 <th className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
-                                    <div className='flex items-center gap-1'>
+                                    <div className='flex items-center justify-center gap-1'>
                                         Nombre de la Organizacion
-                                        <button onClick={() => handleSortPropertyChange('ornganizationname')}>
+                                        <button onClick={() => handleSortPropertyChange('organizationname')}>
 
-                                            {sortProperty === 'ornganizationname' ? (
+                                            {sortProperty === 'organizationname' ? (
                                                 sortDirection === 'asc' ? (
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M15 11.25l-3-3m0 0l-3 3m3-3v7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -301,9 +323,16 @@ const MyProfilesCRUD: React.FC = () => {
                                     </div>
                                 </th>
 
-                                <th className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+                                <th className="text-center whitespace-nowrap px-4 py-2 font-medium text-gray-900">
                                     Roles
                                 </th>
+
+
+                                {isChofer && (
+                                    <th className="text-center whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+                                        Roles
+                                    </th>
+                                )}
 
                             </tr>
                         </thead>
@@ -320,7 +349,7 @@ const MyProfilesCRUD: React.FC = () => {
                                     </td>
 
                                     <td className="text-gray-600 whitespace-nowrap px-4 py-2 font-medium">
-                                        {item.ornganizationname}
+                                        {item.organizationname}
                                     </td>
 
                                     <td className="whitespace-nowrap px-4 py-2 font-medium">
@@ -342,6 +371,40 @@ const MyProfilesCRUD: React.FC = () => {
                                             </span>
                                         ))}
                                     </td>
+
+                                    {isChofer && (
+                                        <th className="text-center whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+                                            <Link href={`/Transport/Routes/${item.organizationID}?name=${encodeURIComponent(item.organizationname)}`}>
+                                                <CustomButton
+                                                    type="button"
+                                                    color="indigo"
+                                                    padding_x="4"
+                                                    padding_smx="4"
+                                                    padding_mdx="4"
+                                                    padding_y="2"
+                                                    width="32"
+                                                    height="10"
+                                                >
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        strokeWidth="1.5"
+                                                        stroke="currentColor"
+                                                        className="h-4 w-4"
+                                                    >
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"
+                                                        />
+                                                    </svg>
+
+                                                    Ver Rutas
+                                                </CustomButton>
+                                            </Link>
+                                        </th>
+                                    )}
 
                                 </tr>
                             ))}

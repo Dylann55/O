@@ -18,9 +18,11 @@ const ITEMS_PER_PAGE = 30; // Numero de elementos a mostrar por pagina
 
 interface OrganizationCRUDProps {
   urls: string[];
+  title: string;
+  subtitle: string;
 }
 
-const OrganizationCRUD: React.FC<OrganizationCRUDProps> = ({ urls }) => {
+const OrganizationCRUD: React.FC<OrganizationCRUDProps> = ({ urls, title, subtitle }) => {
 
   const [itemName] = useState<string>('Organizacion');
 
@@ -382,8 +384,8 @@ const OrganizationCRUD: React.FC<OrganizationCRUDProps> = ({ urls }) => {
       </div>
 
       <ModalCRUD isOpen={ModalOpen}>
-        <div className="mx-auto mt-10 max-w-screen items-center px-6 sm:px-8">
-          <form onSubmit={handleSubmit} className="mb-0 mt-6 space-y-4 rounded-lg p-4 sm:p-6 lg:p-8">
+        <div className="mx-auto max-w-screen items-center">
+          <form onSubmit={handleSubmit} className="mb-0 space-y-4 rounded-lg p-4 sm:p-6 lg:p-8">
 
             <div className="mx-auto max-w-lg text-center">
               <h1 className="text-2xl font-bold sm:text-3xl">
@@ -491,11 +493,83 @@ const OrganizationCRUD: React.FC<OrganizationCRUDProps> = ({ urls }) => {
       </ModalCRUD>
 
 
-      <div className=' bg-gray-100 min-h-screen pt-3 mx-2'>
+      <div className='min-h-screen mx-6 my-2'>
 
-        <div className='flex'>
+        <div className="flex flex-col items-center gap-2 md:flex-row md:justify-between mb-4">
 
-          <div className='flex-1'>
+          <div className='text-center md:text-start'>
+            <h1 className="text-2xl sm:text-3xl font-semibold leading-relaxed text-gray-900">
+              {title}
+            </h1>
+            <p className="text-md sm:text-sm font-medium text-gray-500">
+              {subtitle}
+            </p>
+          </div>
+
+          <div className='flex justify-center gap-2 mt-2'>
+
+            <CustomButton onClick={openLoginModal} type="button"
+              color="indigo"
+              padding_x="3"
+              padding_smx="8"
+              padding_mdx="12"
+              padding_y="2"
+              width="18"
+              height="15"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Crear {itemName}
+            </CustomButton>
+
+            <CustomButton onClick={fetchItems} type="button"
+              color="indigo"
+              padding_x="2"
+              padding_smx="2"
+              padding_mdx="2"
+              padding_y="0"
+              width="10"
+              height="15"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+              </svg>
+            </CustomButton>
+
+            <CustomButton onClick={handleDeleteSelected} type="button"
+              color="red"
+              padding_x="3"
+              padding_smx="8"
+              padding_mdx="12"
+              padding_y="2"
+              width="18"
+              height="15"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+                className="h-5 w-5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                />
+              </svg>
+              Eliminar {itemName}
+            </CustomButton>
+
+          </div>
+
+        </div>
+
+        <div className='flex flex-col items-center gap-2 sm:flex-row'>
+
+          <div className='flex-1 w-full sm:w-auto'>
             <div className="relative z-1">
               <label htmlFor="Search" className="sr-only">
                 Search
@@ -527,7 +601,7 @@ const OrganizationCRUD: React.FC<OrganizationCRUDProps> = ({ urls }) => {
           </div>
 
 
-          <div className='flex-2'>
+          <div className='flex-2 w-full sm:w-auto'>
             <select
               className="h-12 w-full rounded-lg border-gray-300 text-gray-700 text-sm"
               value={searchType}
@@ -540,66 +614,7 @@ const OrganizationCRUD: React.FC<OrganizationCRUDProps> = ({ urls }) => {
 
         </div>
 
-        <div className='flex justify-center gap-2 mt-2'>
-
-          <CustomButton onClick={openLoginModal} type="button"
-            color="indigo"
-            padding_x="3"
-            padding_smx="8"
-            padding_mdx="12"
-            padding_y="2"
-            width="18"
-            height="15"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Crear {itemName}
-          </CustomButton>
-
-          <CustomButton onClick={fetchItems} type="button"
-            color="indigo"
-            padding_x="2"
-            padding_smx="2"
-            padding_mdx="2"
-            padding_y="0"
-            width="10"
-            height="15"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-            </svg>
-          </CustomButton>
-
-          <CustomButton onClick={handleDeleteSelected} type="button"
-            color="red"
-            padding_x="3"
-            padding_smx="8"
-            padding_mdx="12"
-            padding_y="2"
-            width="18"
-            height="15"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="h-5 w-5"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-              />
-            </svg>
-            Eliminar {itemName}
-          </CustomButton>
-
-        </div>
-
-        <div className="mx-2 sm:mx-4 overflow-x-auto">
+        <div className="overflow-x-auto">
 
           <table className="min-w-full divide-y-2 divide-gray-200 bg-white text-sm mt-4">
 
@@ -616,7 +631,7 @@ const OrganizationCRUD: React.FC<OrganizationCRUDProps> = ({ urls }) => {
                 </th>
 
                 <th className="text-start whitespace-nowrap px-4 py-2 font-medium text-gray-900">
-                  <div className='flex items-center gap-1'>
+                  <div className='gap-1'>
                     ID de la {itemName}
                     <button onClick={() => handleSortPropertyChange('organizationID')}>
 
@@ -674,10 +689,10 @@ const OrganizationCRUD: React.FC<OrganizationCRUDProps> = ({ urls }) => {
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y">
               {getCurrentPageItems().map(item => (
 
-                <tr key={item.organizationID}>
+                <tr key={item.organizationID} className='text-gray-600'>
 
                   <td className="px-4 py-2">
                     <div className='h-5 w-5 rounded border-gray-300'>
@@ -689,11 +704,11 @@ const OrganizationCRUD: React.FC<OrganizationCRUDProps> = ({ urls }) => {
                     </div>
                   </td>
 
-                  <td className="text-gray-600 whitespace-nowrap px-4 py-2 font-medium">
+                  <td className="whitespace-nowrap px-4 py-2 font-medium">
                     {item.organizationID}
                   </td>
 
-                  <td className="text-gray-600 whitespace-nowrap px-4 py-2 font-medium">
+                  <td className="whitespace-nowrap px-4 py-2 font-medium">
                     {item.name}
                   </td>
 
@@ -782,6 +797,32 @@ const OrganizationCRUD: React.FC<OrganizationCRUDProps> = ({ urls }) => {
                         Ver Usuarios
                       </CustomButton>
                     </Link>
+
+                    <Link href={`/${urls[4]}/Routes/${item.organizationID}?name=${encodeURIComponent(item.name)}`}>
+                      <CustomButton type="button"
+                        color="indigo"
+                        padding_x="4"
+                        padding_smx="4"
+                        padding_mdx="4"
+                        padding_y="2"
+                        width="32"
+                        height="10"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth="1.5"
+                          stroke="currentColor"
+                          className="h-4 w-4"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12.75 3.03v.568c0 .334.148.65.405.864l1.068.89c.442.369.535 1.01.216 1.49l-.51.766a2.25 2.25 0 01-1.161.886l-.143.048a1.107 1.107 0 00-.57 1.664c.369.555.169 1.307-.427 1.605L9 13.125l.423 1.059a.956.956 0 01-1.652.928l-.679-.906a1.125 1.125 0 00-1.906.172L4.5 15.75l-.612.153M12.75 3.031a9 9 0 00-8.862 12.872M12.75 3.031a9 9 0 016.69 14.036m0 0l-.177-.529A2.25 2.25 0 0017.128 15H16.5l-.324-.324a1.453 1.453 0 00-2.328.377l-.036.073a1.586 1.586 0 01-.982.816l-.99.282c-.55.157-.894.702-.8 1.267l.073.438c.08.474.49.821.97.821.846 0 1.598.542 1.865 1.345l.215.643m5.276-3.67a9.012 9.012 0 01-5.276 3.67m0 0a9 9 0 01-10.275-4.835M15.75 9c0 .896-.393 1.7-1.016 2.25" />
+
+                        </svg>
+
+                        Ver Rutas
+                      </CustomButton>
+                    </Link> 
 
                   </td>
 

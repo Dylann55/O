@@ -11,10 +11,7 @@ export default function Organization() {
                 <Sidebar />
                 <div className='gap-4'>
                     <AdministradorVM />
-                    <div className='flex justify-between p-2 sm:p-10'>
-                        <h2>Bienvenido al Panel de Administracion</h2>
-                        <h2>CRUD de Usurios</h2>
-                    </div>
+
                     <UserAdminCRUD />
                 </div>
             </div>

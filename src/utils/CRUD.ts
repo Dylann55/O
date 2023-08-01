@@ -7,7 +7,7 @@ import { generateToken } from './Jwt';
 export const ReadRequest = async (url: string, newItem: any): Promise<any> => {
     const token = generateToken(newItem);
     const config = {
-        method: 'POST',
+        method: 'GET',
         headers: {
             Authorization: `Bearer ${token}`,
         },
@@ -42,7 +42,7 @@ export const UpdateRequest = async (url: string, newItem: any): Promise<any> => 
     const token = generateToken(newItem);
 
     const config = {
-        method: 'POST',
+        method: 'PUT',
         headers: {
             Authorization: `Bearer ${token}`,
         },
@@ -57,7 +57,7 @@ export const DeleteRequest = async (url: string, Item: any): Promise<any> => {
     const token = generateToken(Item);
 
     const config = {
-        method: 'POST',
+        method: 'DELETE',
         headers: {
             Authorization: `Bearer ${token}`,
         },

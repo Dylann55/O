@@ -9,10 +9,10 @@ export default function Transport() {
     const { name } = router.query;
 
     const myUrls = [
-        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/listTransport',
-        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/createTransport',
-        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/updateTransportMaxWeight',
-        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/deleteTransport',
+        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/transports',
+        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/transports',
+        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/transports',
+        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/transports',
       ];
 
 
@@ -22,11 +22,8 @@ export default function Transport() {
                 <Sidebar />
                 <div className='gap-4'>
                     <OrganizationVM />
-                    <div className='flex justify-between p-2 sm:p-10'>
-                        <h2>Bienvenido a {name}</h2>
-                        <h2>CRUD de Vehiculos</h2>
-                    </div>
-                    <VehicleCRUD urls={myUrls}/>
+
+                    <VehicleCRUD urls={myUrls} title={`Bienvenido a ${name}`} subtitle={'CRUD de Vehiculos'}/>
                 </div>
             </div>
         </>

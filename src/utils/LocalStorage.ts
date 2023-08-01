@@ -67,11 +67,11 @@ export const getSession = async (): Promise<any | null> => {
   if (session?.refresh_token) {
 
     const refresh_token = session.refresh_token;
-    console.log(refresh_token);
+
     const token = generateToken({ refresh_token });
     
     const config = {
-      method: 'POST',
+      method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -80,7 +80,8 @@ export const getSession = async (): Promise<any | null> => {
     const url = process.env.NEXT_PUBLIC_MIDDLE_URL + '/auth/refreshToken';
     const response = await fetchDataWithConfig(url, config);
 
-    const decoded = verifyToken(response);
+    const decoded = verifyToken(response.token);
+    
     const sessionJson = JSON.stringify(decoded.data.session);
     localStorage.setItem('session', sessionJson);
     localStorage.setItem('access_token_Request', decoded.data.session.access_token);

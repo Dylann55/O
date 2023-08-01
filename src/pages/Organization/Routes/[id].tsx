@@ -1,20 +1,21 @@
 //import Router from 'next/router';
-import VehicleCRUD from '@/components/CRUD/VehicleCRUD';
 import Sidebar from '@/components/Widgets/Sidebar';
 import OrganizationVM from '@/components/Widgets/VerticalMenu/OrganizationVM';
+
 import { useRouter } from 'next/router';
 
-export default function Transport() {
+export default function Routes() {
+
     const router = useRouter();
     const { name } = router.query;
 
     const myUrls = [
-        process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/transports',
-        process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/transports',
-        process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/transports',
-        process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/transports',
-      ];
-
+        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/profileUsers/RolesView',
+        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/profileUsers',
+        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/profileUsers/all',
+        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/profileUsers/inviteDriver',
+        'Organization',
+    ];
 
     return (
         <>
@@ -23,7 +24,6 @@ export default function Transport() {
                 <div className='gap-4'>
                     <OrganizationVM />
 
-                    <VehicleCRUD urls={myUrls} title={`Bienvenido a ${name}`} subtitle={'CRUD de Vehiculos'}/>
                 </div>
             </div>
         </>

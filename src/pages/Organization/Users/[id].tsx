@@ -11,17 +11,17 @@ export default function Users() {
     const { name } = router.query;
 
     const myUrls = [
-        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/userOrganizationRoles',
-        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/createProfileUser',
-        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/deleteAllProfileUser',
-        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/registerUser',
+        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/profileUsers/RolesView',
+        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/profileUsers',
+        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/profileUsers/all',
+        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/profileUsers/inviteDriver',
         'Organization',
     ];
 
     const myUrls_Role = [
-        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/listMyParticipationCompany',
-        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/createProfileUser',
-        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/deleteProfileUser',
+        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/profileUsers',
+        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/profileUsers',
+        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/profileUsers',
     ];
 
     return (
@@ -30,11 +30,8 @@ export default function Users() {
                 <Sidebar />
                 <div className='gap-4'>
                     <OrganizationVM />
-                    <div className='flex justify-between p-2 sm:p-10'>
-                        <h2>Bienvenido a {name}</h2>
-                        <h2>CRUD de Perfiles</h2>
-                    </div>
-                    <UsersCRUD urls={myUrls} urlsRole={myUrls_Role} />
+
+                    <UsersCRUD urls={myUrls} urlsRole={myUrls_Role} title={`Bienvenido a ${name}`} subtitle={'CRUD de Usuarios'} />
                 </div>
             </div>
         </>

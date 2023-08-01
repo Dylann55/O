@@ -2,22 +2,18 @@ import NestedList from "./VerticalMenu";
 
 const menu = [
     {
-        label: 'Organizacion',
+        label: 'Transporte',
         href: '',
         subMenu: [
             {
-                label: 'Mis Organizaciones',
-                href: '/Organization/MyOrganizations',
-            },
-            {
                 label: 'Mis Participaciones',
-                href: '/Organization/MyParticipation',
+                href: '/Transport/MyParticipation',
             },
         ],
     },
 ];
 
-export default function OrganizationVM() {
+export default function TransportVM() {
 
     return (
         <>

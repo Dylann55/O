@@ -10,17 +10,17 @@ export default function Users() {
     const router = useRouter();
     const { name } = router.query;
 
-    const myUrls = [
-        process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/listProfileUserOrganization',
-        process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/createProfileUser',
-        process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/deleteAllProfileUser',
+    const myUrls = [    
+        process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/profileUsers/organization/RolesView',
+        process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/profileUsers',
+        process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/profileUsers',
         process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/CreateUser',
         'Administrator',
     ];
 
     const myUrls_Role = [
-        process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/listProfileUser',
-        process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/createProfileUser',
+        process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/profileUsers',
+        process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/profileUsers',
         process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/deleteProfileUser',
     ];
 
@@ -31,11 +31,8 @@ export default function Users() {
                 <Sidebar />
                 <div className='gap-4'>
                     <OrganizationVM />
-                    <div className='flex justify-between p-2 sm:p-10'>
-                        <h2>Bienvenido a {name}</h2>
-                        <h2>CRUD de Usuarios</h2>
-                    </div>
-                    <UsersCRUD urls={myUrls} urlsRole={myUrls_Role} />
+
+                    <UsersCRUD urls={myUrls} urlsRole={myUrls_Role} title={`Bienvenido a ${name}`} subtitle={'CRUD de Usuarios'} />
                 </div>
             </div>
         </>

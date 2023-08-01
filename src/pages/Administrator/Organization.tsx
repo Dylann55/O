@@ -6,10 +6,10 @@ import OrganizationCRUD from '@/components/CRUD/OrganizationCRUD';
 export default function Organization() {
 
     const myUrls = [
-        process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/listCompany',
-        process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/createCompany',
-        process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/updateCompany',
-        process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/deleteCompany',
+        process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/companies',
+        process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/companies',
+        process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/companies',
+        process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/companies',
         'Administrator',
     ];
 
@@ -19,11 +19,8 @@ export default function Organization() {
                 <Sidebar />
                 <div className='gap-4'>
                     <AdministradorVM />
-                    <div className='flex justify-between p-2 sm:p-10'>
-                        <h2>Bienvenido a Panel de Administracion</h2>
-                        <h2>CRUD de Organizacion</h2>
-                    </div>
-                    <OrganizationCRUD urls={myUrls} />
+
+                    <OrganizationCRUD urls={myUrls} title={'Bienvenido a Panel de Administracion'} subtitle={'CRUD de Organizacion'}  />
                 </div>
             </div>
         </>

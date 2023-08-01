@@ -30,7 +30,7 @@ export default function AdministradorVM() {
 
     return (
         <>
-            <div className='flex justify-between p-4'>
+            <div className='flex justify-between mt-2 mx-2'>
                 <NestedList menu={menu} />
             </div>
         </>

@@ -6,7 +6,7 @@ import { fetchDataWithConfig } from '@/utils/Fetch';
 const SocialButtons = () => {
   const signInWithGoogle = async () => {
     const config = {
-      method: 'POST',
+      method: 'GET',
     };
 
     try {
@@ -20,7 +20,7 @@ const SocialButtons = () => {
 
   const signInWithLinkedIn = async () => {
     const config = {
-      method: 'POST',
+      method: 'GET',
     };
 
     try {

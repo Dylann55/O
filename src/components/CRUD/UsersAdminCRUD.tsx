@@ -18,7 +18,6 @@ interface Item {
     password: string;
 }
 
-
 const ITEMS_PER_PAGE = 30; // Numero de elementos a mostrar por pagina
 const url_item = process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin';
 
@@ -46,7 +45,7 @@ const UsersAdminCRUD: React.FC = () => {
 
     const fetchItems = async () => {
         try {
-            const url = url_item + `/listUsers`;
+            const url = url_item + `/users`;
 
             const access_token = localStorage.getItem('access_token_Request');
 
@@ -79,7 +78,7 @@ const UsersAdminCRUD: React.FC = () => {
                 setMessageError('Contraseña Invalida');
                 return;
             }
-            const url = url_item + `/createUser`;
+            const url = url_item + `/users`;
 
             const access_token = localStorage.getItem('access_token_Request');
 
@@ -104,7 +103,7 @@ const UsersAdminCRUD: React.FC = () => {
 
         try {
 
-            const url = url_item + `/updateUserData`;
+            const url = url_item + `/users/updateData`;
             const access_token = localStorage.getItem('access_token_Request');
             if (access_token) {
 
@@ -129,7 +128,7 @@ const UsersAdminCRUD: React.FC = () => {
 
     const handleDeleteSelected = async () => {
         try {
-            const url = url_item + `/deleteUser`;
+            const url = url_item + `/Users`;
             const access_token = localStorage.getItem('access_token_Request');
             if (access_token) {
                 const idsToDelete = selectedItems.map(item => item.id);
@@ -162,7 +161,7 @@ const UsersAdminCRUD: React.FC = () => {
                 return;
             }
 
-            const url = url_item + `/updateUserPassword`;
+            const url = url_item + `/users/updatePassword`;
             const access_token = localStorage.getItem('access_token_Request');
             if (access_token) {
 
@@ -441,8 +440,8 @@ const UsersAdminCRUD: React.FC = () => {
             </div>
 
             <ModalCRUD isOpen={ModalOpen}>
-                <div className="mx-auto mt-10 max-w-screen items-center px-6 sm:px-8">
-                    <form onSubmit={handleSubmit} className="mb-0 mt-6 space-y-4 rounded-lg p-4 sm:p-6 lg:p-8">
+                <div className="mx-auto max-w-screen items-center">
+                    <form onSubmit={handleSubmit} className="mb-0 space-y-4 rounded-lg p-4 sm:p-6">
 
                         <div className="mx-auto max-w-lg text-center">
                             <h1 className="text-2xl font-bold sm:text-3xl">
@@ -636,10 +635,10 @@ const UsersAdminCRUD: React.FC = () => {
             </ModalCRUD>
 
             <ModalCRUD isOpen={passwordModalOpen}>
-                <div className="mx-auto mt-20 max-w-screen-sm items-center gap-1 px-0 py-2 sm:mt-5">
+                <div className="mx-auto max-w-screen items-center">
                     <form
                         onSubmit={ChangePassword}
-                        className="mb-0 mt-1 space-y-4 rounded-lg p-4 sm:p-6 lg:p-8"
+                        className="mb-0 space-y-4 rounded-lg p-4 sm:p-6"
                     >
                         <div className="mx-auto max-w-lg text-center">
                             <h1 className="text-2xl font-bold sm:text-3xl">
@@ -735,11 +734,85 @@ const UsersAdminCRUD: React.FC = () => {
                 </div>
             </ModalCRUD>
 
-            <div className=' bg-gray-100 min-h-screen pt-3 mx-2'>
 
-                <div className='flex'>
+            <div className='min-h-screen mx-6 my-2'>
 
-                    <div className='flex-1'>
+                <div className="flex flex-col items-center gap-2 md:flex-row md:justify-between mb-4">
+
+                    <div className='text-center md:text-start'>
+                        <h1 className="text-2xl sm:text-3xl font-semibold leading-relaxed text-gray-900">
+                            Bienvenido al Panel de Administracion
+                        </h1>
+                        <p className="text-md sm:text-sm font-medium text-gray-500">
+                            CRUD de Usurios
+                        </p>
+                    </div>
+
+                    <div className='flex justify-center gap-2 mt-2'>
+
+
+                        <CustomButton onClick={openLoginModal} type="button"
+                            color="indigo"
+                            padding_x="3"
+                            padding_smx="8"
+                            padding_mdx="12"
+                            padding_y="2"
+                            width="32"
+                            height="15"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Crear {itemName}
+                        </CustomButton>
+
+                        <CustomButton onClick={fetchItems} type="button"
+                            color="indigo"
+                            padding_x="2"
+                            padding_smx="2"
+                            padding_mdx="2"
+                            padding_y="0"
+                            width="10"
+                            height="15"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                            </svg>
+                        </CustomButton>
+
+                        <CustomButton onClick={handleDeleteSelected} type="button"
+                            color="red"
+                            padding_x="3"
+                            padding_smx="8"
+                            padding_mdx="12"
+                            padding_y="2"
+                            width="32"
+                            height="15"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                strokeWidth="1.5"
+                                stroke="currentColor"
+                                className="h-5 w-5"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                                />
+                            </svg>
+                            Eliminar {itemName}
+                        </CustomButton>
+
+                    </div>
+
+                </div>
+
+                <div className='flex flex-col items-center gap-2 sm:flex-row'>
+
+                    <div className='flex-1 w-full sm:w-auto'>
                         <div className="relative z-1">
                             <label htmlFor="Search" className="sr-only">
                                 Search
@@ -771,7 +844,7 @@ const UsersAdminCRUD: React.FC = () => {
                     </div>
 
 
-                    <div className='flex-2'>
+                    <div className='flex-2 w-full sm:w-auto'>
                         <select
                             className="h-12 w-full rounded-lg border-gray-300 text-gray-700 text-sm"
                             value={searchType}
@@ -788,67 +861,9 @@ const UsersAdminCRUD: React.FC = () => {
 
                 </div>
 
-                <div className='flex justify-center gap-2 mt-2'>
 
 
-                    <CustomButton onClick={openLoginModal} type="button"
-                        color="indigo"
-                        padding_x="3"
-                        padding_smx="8"
-                        padding_mdx="12"
-                        padding_y="2"
-                        width="32"
-                        height="15"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Crear {itemName}
-                    </CustomButton>
-
-                    <CustomButton onClick={fetchItems} type="button"
-                        color="indigo"
-                        padding_x="2"
-                        padding_smx="2"
-                        padding_mdx="2"
-                        padding_y="0"
-                        width="10"
-                        height="15"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-                        </svg>
-                    </CustomButton>
-
-                    <CustomButton onClick={handleDeleteSelected} type="button"
-                        color="red"
-                        padding_x="3"
-                        padding_smx="8"
-                        padding_mdx="12"
-                        padding_y="2"
-                        width="32"
-                        height="15"
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth="1.5"
-                            stroke="currentColor"
-                            className="h-5 w-5"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-                            />
-                        </svg>
-                        Eliminar {itemName}
-                    </CustomButton>
-
-                </div>
-
-                <div className="mx-2 sm:mx-4 overflow-x-auto">
+                <div className="overflow-x-auto">
 
                     <table className="min-w-full divide-y-2 divide-gray-200 bg-white text-sm mt-4">
 
@@ -966,10 +981,10 @@ const UsersAdminCRUD: React.FC = () => {
                             </tr>
                         </thead>
 
-                        <tbody className="divide-y divide-gray-200">
+                        <tbody className="divide-y">
                             {getCurrentPageItems().map(item => (
 
-                                <tr key={item.id}>
+                                <tr key={item.id} className='text-gray-600'>
 
                                     <td className="px-4 py-2">
                                         <div className='h-5 w-5 rounded border-gray-300'>
@@ -981,7 +996,7 @@ const UsersAdminCRUD: React.FC = () => {
                                         </div>
                                     </td>
 
-                                    <td className="text-gray-600 whitespace-nowrap px-4 py-2 font-medium">
+                                    <td className="whitespace-nowrap px-4 py-2 font-medium">
                                         {item.id}
                                     </td>
 
@@ -995,7 +1010,7 @@ const UsersAdminCRUD: React.FC = () => {
                                         </div>
                                     </td>
 
-                                    <td className="text-gray-600 whitespace-nowrap px-4 py-2 font-medium">
+                                    <td className="whitespace-nowrap px-4 py-2 font-medium">
                                         {item.email}
                                     </td>
 

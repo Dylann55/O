@@ -56,7 +56,7 @@ const navigation = [
     {
         id: 2,
         label: "Transporte",
-        url: "/Transport/Transport",
+        url: "/Transport/MyParticipation",
         icon: (
             <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -124,9 +124,11 @@ const Sidebar: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
+
         if (!checkSession()) {
             router.push('/');
         }
+        
     }, []);
 
     // Si el usuario no cerro la sesion refrescara la pagina

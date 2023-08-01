@@ -3,7 +3,7 @@ import { ReadRequest } from './CRUD';
 
 const VerifyUser = async (): Promise<void> => {
   try {
-    const url = process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/checkadmin';
+    const url = process.env.NEXT_PUBLIC_MIDDLE_URL + '/users/data/checkAdmin';
     const access_token = localStorage.getItem('access_token_Request');
 
     if (access_token) {

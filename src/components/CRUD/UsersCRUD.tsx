@@ -7,7 +7,7 @@ import Alert from '../Widgets/Alert';
 import AlertVerification from '../Widgets/AlertVerification';
 import CustomButton from '../Widgets/Button/CustomButton';
 
-import { CreateRequest, DeleteRequest, ReadRequest, UpdateRequest } from '@/utils/CRUD';
+import { CreateRequest, DeleteRequest, ReadRequest } from '@/utils/CRUD';
 import { getSession } from '@/utils/LocalStorage';
 import RoleCRUD from './RoleCRUD';
 
@@ -19,7 +19,7 @@ interface Item {
     name: string;
     lastName: string;
     email: string;
-    ornganizationname: string;
+    organizationname: string;
     organizationID: number;
 }
 
@@ -32,9 +32,11 @@ const ITEMS_PER_PAGE = 30; // Numero de elementos a mostrar por pagina
 interface UsersCRUDProps {
     urls: string[];
     urlsRole: string[];
+    title: string;
+    subtitle: string;
 }
 
-const UsersCRUD: React.FC<UsersCRUDProps> = ({ urls, urlsRole }) => {
+const UsersCRUD: React.FC<UsersCRUDProps> = ({ urls, urlsRole, title, subtitle }) => {
 
     const [itemName] = useState<string>('Perfil');
     const router = useRouter();
@@ -51,7 +53,7 @@ const UsersCRUD: React.FC<UsersCRUDProps> = ({ urls, urlsRole }) => {
         lastName: '',
         email: '',
         organizationID: 0,
-        ornganizationname: '',
+        organizationname: '',
     });
 
     const [Profile, setProfile] = useState<Profile>({
@@ -79,7 +81,7 @@ const UsersCRUD: React.FC<UsersCRUDProps> = ({ urls, urlsRole }) => {
                 }
 
                 const response = await ReadRequest(url, config);
-                if (!response.error) {
+                if (!response.error && !response.errors) {
                     if (response.message) {
                         setMessageError(response.message);
                     }
@@ -108,6 +110,7 @@ const UsersCRUD: React.FC<UsersCRUDProps> = ({ urls, urlsRole }) => {
                 if (access_token) {
                     const Item = { ...newItem, access_token: access_token, organizationID: id, profileID: profileID };
                     const response = await CreateRequest(url, Item);
+                    console.log(response);
                     OptionMessage(response);
 
                 }
@@ -160,7 +163,7 @@ const UsersCRUD: React.FC<UsersCRUDProps> = ({ urls, urlsRole }) => {
                     name: newItem.name,
                     lastName: newItem.lastName,
                 }
-                const response = await UpdateRequest(url, config);
+                const response = await CreateRequest(url, config);
                 OptionMessage(response);
 
             }
@@ -182,7 +185,7 @@ const UsersCRUD: React.FC<UsersCRUDProps> = ({ urls, urlsRole }) => {
             name: '',
             lastName: '',
             email: '',
-            ornganizationname: '',
+            organizationname: '',
             organizationID: 0
         });
         setProfile({
@@ -221,6 +224,7 @@ const UsersCRUD: React.FC<UsersCRUDProps> = ({ urls, urlsRole }) => {
     };
 
     const OptionMessage = (data: any): void => {
+        console.log(data)
         if (data.error) {
             setMessageError(data.error);
         }
@@ -404,8 +408,8 @@ const UsersCRUD: React.FC<UsersCRUDProps> = ({ urls, urlsRole }) => {
             </div>
 
             <ModalCRUD isOpen={ModalOpen}>
-                <div className="mx-auto mt-10 max-w-screen items-center px-6 sm:px-8">
-                    <form onSubmit={handleCreate} className="mb-0 mt-6 space-y-4 rounded-lg p-4 sm:p-6 lg:p-8">
+                <div className="mx-auto max-w-screen items-center">
+                    <form onSubmit={handleCreate} className="mb-0 space-y-4 rounded-lg p-4 sm:p-6 lg:p-8">
 
                         <div className="mx-auto max-w-lg text-center">
                             <h1 className="text-2xl font-bold sm:text-3xl">
@@ -541,8 +545,8 @@ const UsersCRUD: React.FC<UsersCRUDProps> = ({ urls, urlsRole }) => {
             </ModalCRUD>
 
             <ModalCRUD isOpen={InviteModalOpen}>
-                <div className="mx-auto mt-10 max-w-screen items-center px-6 sm:px-8">
-                    <form onSubmit={inviteUser} className="mb-0 mt-6 space-y-4 rounded-lg p-4 sm:p-6 lg:p-8">
+                <div className="mx-auto max-w-screen items-center">
+                    <form onSubmit={inviteUser} className="mb-0 space-y-4 rounded-lg p-4 sm:p-6 lg:p-8">
 
                         <div className="mx-auto max-w-lg text-center">
                             <h1 className="text-2xl font-bold sm:text-3xl">
@@ -689,11 +693,98 @@ const UsersCRUD: React.FC<UsersCRUDProps> = ({ urls, urlsRole }) => {
                 </div>
             </ModalCRUD>
 
-            <div className=' bg-gray-100 min-h-screen pt-3 mx-2'>
+            <div className='min-h-screen mx-6 my-2'>
 
-                <div className='flex'>
+                <div className="flex flex-col items-center gap-2 md:flex-row md:justify-between mb-4">
 
-                    <div className='flex-1'>
+                    <div className='text-center md:text-start'>
+                        <h1 className="text-2xl sm:text-3xl font-semibold leading-relaxed text-gray-900">
+                            {title}
+                        </h1>
+                        <p className="text-md sm:text-sm font-medium text-gray-500">
+                            {subtitle}
+                        </p>
+                    </div>
+
+                    <div className='flex justify-center gap-1 sm:gap-2 mt-2'>
+
+                        <CustomButton onClick={openLoginModal} type="button"
+                            color="indigo"
+                            padding_x="3"
+                            padding_smx="8"
+                            padding_mdx="12"
+                            padding_y="2"
+                            width="60"
+                            height="15"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Crear {itemName}
+                        </CustomButton>
+
+                        <CustomButton onClick={openInviteModal} type="button"
+                            color="indigo"
+                            padding_x="2"
+                            padding_smx="2"
+                            padding_mdx="2"
+                            padding_y="2"
+                            width="10"
+                            height="15"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                            </svg>
+
+                        </CustomButton>
+
+                        <CustomButton onClick={fetchItems} type="button"
+                            color="indigo"
+                            padding_x="2"
+                            padding_smx="2"
+                            padding_mdx="2"
+                            padding_y="2"
+                            width="10"
+                            height="15"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                            </svg>
+                        </CustomButton>
+
+                        <CustomButton onClick={handleDeleteSelected} type="button"
+                            color="red"
+                            padding_x="3"
+                            padding_smx="8"
+                            padding_mdx="12"
+                            padding_y="2"
+                            width="60"
+                            height="15"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                strokeWidth="1.5"
+                                stroke="currentColor"
+                                className="h-5 w-5"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                                />
+                            </svg>
+                            Eliminar {itemName}
+                        </CustomButton>
+
+                    </div>
+
+                </div>
+
+                <div className='flex flex-col items-center gap-2 sm:flex-row'>
+
+                    <div className='flex-1 w-full sm:w-auto'>
                         <div className="relative z-1">
                             <label htmlFor="Search" className="sr-only">
                                 Search
@@ -725,7 +816,7 @@ const UsersCRUD: React.FC<UsersCRUDProps> = ({ urls, urlsRole }) => {
                     </div>
 
 
-                    <div className='flex-2'>
+                    <div className='flex-2 w-full sm:w-auto'>
                         <select
                             className="h-12 w-full rounded-lg border-gray-300 text-gray-700 text-sm"
                             value={searchType}
@@ -742,81 +833,8 @@ const UsersCRUD: React.FC<UsersCRUDProps> = ({ urls, urlsRole }) => {
 
                 </div>
 
-                <div className='flex justify-center gap-1 sm:gap-2 mt-2'>
 
-                    <CustomButton onClick={openLoginModal} type="button"
-                        color="indigo"
-                        padding_x="3"
-                        padding_smx="8"
-                        padding_mdx="12"
-                        padding_y="2"
-                        width="60"
-                        height="15"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Crear {itemName}
-                    </CustomButton>
-
-                    <CustomButton onClick={openInviteModal} type="button"
-                        color="indigo"
-                        padding_x="2"
-                        padding_smx="2"
-                        padding_mdx="2"
-                        padding_y="2"
-                        width="10"
-                        height="15"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                        </svg>
-
-                    </CustomButton>
-
-                    <CustomButton onClick={fetchItems} type="button"
-                        color="indigo"
-                        padding_x="2"
-                        padding_smx="2"
-                        padding_mdx="2"
-                        padding_y="2"
-                        width="10"
-                        height="15"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-                        </svg>
-                    </CustomButton>
-
-                    <CustomButton onClick={handleDeleteSelected} type="button"
-                        color="red"
-                        padding_x="3"
-                        padding_smx="8"
-                        padding_mdx="12"
-                        padding_y="2"
-                        width="60"
-                        height="15"
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth="1.5"
-                            stroke="currentColor"
-                            className="h-5 w-5"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-                            />
-                        </svg>
-                        Eliminar {itemName}
-                    </CustomButton>
-
-                </div>
-
-                <div className="mx-2 sm:mx-4 overflow-x-auto">
+                <div className="overflow-x-auto">
 
                     <table className="min-w-full divide-y-2 divide-gray-200 bg-white text-sm mt-4">
 
@@ -939,10 +957,10 @@ const UsersCRUD: React.FC<UsersCRUDProps> = ({ urls, urlsRole }) => {
                             </tr>
                         </thead>
 
-                        <tbody className="divide-y divide-gray-200">
+                        <tbody className="divide-y">
                             {getCurrentPageItems().map(item => (
 
-                                <tr key={item.userID}>
+                                <tr key={item.userID} className='text-gray-600'>
 
                                     <td className="px-4 py-2">
                                         <div className='h-5 w-5 rounded border-gray-300'>
@@ -954,7 +972,7 @@ const UsersCRUD: React.FC<UsersCRUDProps> = ({ urls, urlsRole }) => {
                                         </div>
                                     </td>
 
-                                    <td className="text-gray-600 whitespace-nowrap px-4 py-2 font-medium">
+                                    <td className="whitespace-nowrap px-4 py-2 font-medium">
                                         {item.userID}
                                     </td>
 
@@ -967,7 +985,7 @@ const UsersCRUD: React.FC<UsersCRUDProps> = ({ urls, urlsRole }) => {
                                         </div>
                                     </td>
 
-                                    <td className="text-gray-600 whitespace-nowrap px-4 py-2 font-medium">
+                                    <td className="whitespace-nowrap px-4 py-2 font-medium">
                                         {item.email}
                                     </td>
 
@@ -993,7 +1011,7 @@ const UsersCRUD: React.FC<UsersCRUDProps> = ({ urls, urlsRole }) => {
 
 
                                     <td className="px-4 py-2">
-                                        <RoleCRUD urls={urlsRole} id={item.userID} OrganizacionID={item.organizationID} name={item.ornganizationname} />
+                                        <RoleCRUD urls={urlsRole} id={item.userID} OrganizacionID={item.organizationID} name={item.organizationname} />
                                     </td>
 
                                 </tr>
