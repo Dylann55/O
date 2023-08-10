@@ -55,38 +55,42 @@ export const getSessionPrevious = async (): Promise<any | null> => {
       return session;
     } catch (error) {
 
-      return null; 
+      return null;
     }
 
   }
 };
 
 export const getSession = async (): Promise<any | null> => {
-  
-  const session = await getSessionPrevious();
-  if (session?.refresh_token) {
+  try {
+    const session = await getSessionPrevious();
+    if (session?.refresh_token) {
+      const refresh_token = session.refresh_token;
+      const token = generateToken({ refresh_token });
 
-    const refresh_token = session.refresh_token;
+      const config = {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
 
-    const token = generateToken({ refresh_token });
-    
-    const config = {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-
-    const url = process.env.NEXT_PUBLIC_MIDDLE_URL + '/auth/refreshToken';
-    const response = await fetchDataWithConfig(url, config);
-
-    const decoded = verifyToken(response.token);
-    
-    const sessionJson = JSON.stringify(decoded.data.session);
-    localStorage.setItem('session', sessionJson);
-    localStorage.setItem('access_token_Request', decoded.data.session.access_token);
+      const url = process.env.NEXT_PUBLIC_MIDDLE_URL + '/auth/refreshToken';
+      const response = await fetchDataWithConfig(url, config);
+      if (response.message != "Refresh token inválido o ya esta usado") {
+        const decoded = verifyToken(response.token);
+        const sessionJson = JSON.stringify(decoded.data.session);
+        localStorage.setItem('session', sessionJson);
+        localStorage.setItem('access_token_Request', decoded.data.session.access_token);
+      }
+    }
+  } catch (error) {
+    // Aquí puedes manejar el error de acuerdo a tus necesidades
+    console.error('Ocurrió un error en getSession:', error);
+    // Por ejemplo, puedes mostrar un mensaje de error al usuario o tomar otra acción
   }
 };
+
 
 export const checkSession = (): boolean => {
   const session = localStorage.getItem('access_token');

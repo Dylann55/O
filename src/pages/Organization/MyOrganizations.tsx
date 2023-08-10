@@ -6,8 +6,8 @@ import OrganizationCRUD from '@/components/CRUD/OrganizationCRUD';
 export default function Organization() {
 
     const myUrls = [
-        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/companies',
-        process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/companies',
+        process.env.NEXT_PUBLIC_MIDDLE_URL + '/users/companies',
+        process.env.NEXT_PUBLIC_MIDDLE_URL + '/users/companies',
         process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/companies',
         process.env.NEXT_PUBLIC_MIDDLE_URL + '/manage/companies',
         'Organization',

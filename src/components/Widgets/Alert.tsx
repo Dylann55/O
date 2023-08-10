@@ -9,7 +9,7 @@ const Alert: React.FC<AlertProps> = ({ message, onClose }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
-    }, 5000);
+    }, 7000);
 
     return () => clearTimeout(timer);
   }, [onClose]);
@@ -42,10 +42,10 @@ const Alert: React.FC<AlertProps> = ({ message, onClose }) => {
             />
           </svg>
 
-          <strong className="block font-medium">Mensaje de Error</strong>
+          <strong className="block font-medium text-xs sm:text-sm">Mensaje de Error</strong>
         </div>
 
-        <p className="mt-2 text-sm">{message}</p>
+        <p className="mt-1 text-xs sm:text-sm">{message}</p>
       </div>
     </div>
   );

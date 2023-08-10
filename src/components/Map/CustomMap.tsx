@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
+import { GoogleMap, Marker } from '@react-google-maps/api';
 
 interface MarkerData {
   name: string;
@@ -27,32 +27,34 @@ const CustomMap: React.FC<CustomMapProps> = ({
   };
 
   return (
-    <div style={{ width: '500px', height: '400px', border: '1px solid black' }}>
-      <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}>
-        <GoogleMap
-          mapContainerStyle={{ width: '500px', height: '400px' }}
-          center={center}
-          zoom={2}
-          onClick={handleMapClick}
-          onLoad={handleMapLoad}
-        >
-          {mapLoaded &&
-            markers.map((item, index) => (
-              <Marker
-                key={index}
-                position={{ lat: item.latitude!, lng: item.longitude! }}
-                title={item.name}
-                icon={{
-                  url: selectedMarkers.includes(index)
-                    ? 'https://maps.google.com/mapfiles/ms/icons/red-dot.png'
-                    : 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-                  scaledSize: new window.google.maps.Size(30, 30),
-                }}
-              />
-            ))}
-        </GoogleMap>
-      </LoadScript>
+
+
+    <div className="h-64 md:h-96">
+      <GoogleMap
+        mapContainerStyle={{ width: '100%', height: '100%' }}
+        center={center}
+        zoom={2}
+        onClick={handleMapClick}
+        onLoad={handleMapLoad}
+      >
+        {mapLoaded &&
+          markers.map((item, index) => (
+            <Marker
+              key={index}
+              position={{ lat: item.latitude!, lng: item.longitude! }}
+              title={item.name}
+              icon={{
+                url: selectedMarkers.includes(index)
+                  ? 'https://maps.google.com/mapfiles/ms/icons/red-dot.png'
+                  : 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+                scaledSize: new window.google.maps.Size(30, 30),
+              }}
+            />
+          ))}
+      </GoogleMap>
     </div>
+
+
   );
 };
 

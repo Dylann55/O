@@ -30,11 +30,12 @@ const CustomButton: React.FC<CustomButtonProps> = ({
       onClick(event);
     }
   };
-
+  
   // Utilizamos el color seleccionado para formar las clases CSS
   const buttonClassName = `w-${width} h-${height} text-white inline-flex items-center justify-center gap-2 rounded border 
   ${color === 'indigo' ? 'border-indigo-600 bg-indigo-600 hover:text-indigo-600' :
       color === 'red' ? 'border-red-600 bg-red-600 hover:text-red-600' :
+      color === 'yellow' ? 'border-yellow-400 bg-yellow-400 hover:text-yellow-400' :
         'border-gray-600 bg-gray-600 hover:text-gray-600'} 
   px-${padding_x} sm:px-${padding_smx} md:px-${padding_mdx} py-${padding_y} text-sm font-medium hover:bg-transparent focus:outline-none focus:ring`;
 

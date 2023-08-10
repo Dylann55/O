@@ -21,7 +21,7 @@ export default function Users() {
     const myUrls_Role = [
         process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/profileUsers',
         process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/profileUsers',
-        process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/deleteProfileUser',
+        process.env.NEXT_PUBLIC_MIDDLE_URL + '/sysadmin/profileUsers',
     ];
 
 

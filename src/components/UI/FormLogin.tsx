@@ -14,10 +14,10 @@ import { isPasswordValid } from '../../utils/VerifyUser';
 import Alert from '../Widgets/Alert';
 import AlertVerification from '../Widgets/AlertVerification';
 import Button from '../Widgets/Button';
-import ButtonCustomer from '../Widgets/ButtonCustomer';
 // Components
 import Modal from '../Widgets/Modal';
 import UserForm from './UserForm';
+import CustomButton from '../Widgets/Button/CustomButton';
 
 //Clases
 
@@ -123,7 +123,8 @@ const FormLogin: React.FC = () => {
       email,
       password,
       name: '',
-      lastName: ''
+      lastName: '',
+      rut:'00.000.000-0'
     };
 
     const config = {
@@ -135,7 +136,7 @@ const FormLogin: React.FC = () => {
     try {
       const url = `${process.env.NEXT_PUBLIC_MIDDLE_URL}/auth/signupWithEmail`;
       const data = await fetchDataWithConfig(url, config);
-
+      console.log(data)
       OptionMessageRegister(data);
     } catch (error) {
       setMessageError((error as Error).message);
@@ -158,7 +159,8 @@ const FormLogin: React.FC = () => {
   };
 
   // Funcion que envia un solicitud de recuperacion de contraseña
-  const recoverPassword = async () => {
+  const recoverPassword = async (event: React.FormEvent) => {
+    event.preventDefault();
     const user = {
       email,
     };
@@ -173,6 +175,7 @@ const FormLogin: React.FC = () => {
       const data = await fetchDataWithConfig(url, config);
       if (data.message === 'Correo de restablecimiento de contraseña enviado') {
         setMessageVerification(data.message);
+        return;
       }
       setMessageError(data.message);
     } catch (error) {
@@ -225,30 +228,50 @@ const FormLogin: React.FC = () => {
 
       <div className="flex items-center justify-center gap-2 sm:flex-row">
         {!isSession && (
-          <ButtonCustomer
-            onClick={openLoginModal}
-            className="rounded border border-indigo-600 bg-indigo-600 px-20 py-2 text-sm font-medium text-white hover:bg-transparent hover:text-indigo-600 focus:outline-none focus:ring active:text-indigo-500 md:px-10"
-          >
-            Ingresar
-          </ButtonCustomer>
+          <div className="w-96 sm:w-52 md:w-36">
+            <CustomButton onClick={openLoginModal} type="button"
+              color="indigo"
+              padding_x="0"
+              padding_smx="0"
+              padding_mdx="0"
+              padding_y="2.5"
+              width="full"
+              height="10"
+            >
+              Ingresar
+            </CustomButton>
+          </div>
         )}
 
         {isSession && (
           <>
-            <div className="flex flex-col gap-2 sm:flex-row sm:gap-4">
-              <ButtonCustomer
-                onClick={Dashboard}
-                className="rounded border border-indigo-600 bg-indigo-600 px-12 py-2 text-xs font-medium text-white hover:bg-transparent hover:text-indigo-600 focus:outline-none focus:ring active:text-indigo-500 sm:text-sm md:px-6"
-              >
-                Dashboard
-              </ButtonCustomer>
-
-              <ButtonCustomer
-                onClick={CloseSession}
-                className="rounded border border-indigo-600 bg-indigo-600 px-10 py-2 text-xs font-medium text-white hover:bg-transparent hover:text-indigo-600 focus:outline-none focus:ring active:text-indigo-500 sm:px-6 sm:text-sm"
-              >
-                Cerrar Sesión
-              </ButtonCustomer>
+            <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-center">
+              <div className="flex-1 w-96 sm:w-52 md:w-36">
+                <CustomButton onClick={Dashboard} type="button"
+                  color="indigo"
+                  padding_x="0"
+                  padding_smx="0"
+                  padding_mdx="0"
+                  padding_y="2.5"
+                  width="full"
+                  height="10"
+                >
+                  Dashboard
+                </CustomButton>
+              </div>
+              <div className="flex-1 w-96 sm:w-52 md:w-36">
+                <CustomButton onClick={CloseSession} type="button"
+                  color="indigo"
+                  padding_x="0"
+                  padding_smx="0"
+                  padding_mdx="0"
+                  padding_y="2.5"
+                  width="full"
+                  height="10"
+                >
+                  Cerrar Sesión
+                </CustomButton>
+              </div>
             </div>
           </>
         )}
@@ -289,10 +312,10 @@ const FormLogin: React.FC = () => {
       </Modal>
 
       <Modal isOpen={passwordModalOpen}>
-        <div className="mx-auto mt-20 max-w-screen-sm items-center gap-1 px-0 py-2 sm:mt-5">
+        <div className="mx-auto max-w-screen items-center">
           <form
             onSubmit={recoverPassword}
-            className="mb-0 mt-1 space-y-4 rounded-lg p-4 sm:p-6 lg:p-8"
+            className="mb-0 space-y-2 rounded-lg p-6 sm:p-8 lg:p-10"
           >
             <div className="mx-auto max-w-lg text-center">
               <h1 className="text-2xl font-bold sm:text-3xl">
@@ -309,7 +332,7 @@ const FormLogin: React.FC = () => {
               </p>
             </div>
 
-            <div className="relative col-span-6 flex items-center sm:col-span-3">
+            <div className="relative flex items-center">
               <label
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700"
@@ -355,19 +378,38 @@ const FormLogin: React.FC = () => {
               </span>
             </div>
 
-            <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-center">
-              <Button
-                onClick={recoverPassword}
-                className="inline-block rounded bg-indigo-600 px-9 py-3 text-sm font-medium text-white transition hover:scale-110 hover:shadow-xl focus:outline-none focus:ring active:bg-indigo-500 sm:px-8"
-              >
-                Recuperar Contraseña
-              </Button>
-              <ButtonCustomer
-                onClick={closePasswordModal}
-                className="inline-block rounded bg-red-600 px-20 py-3 text-sm font-medium text-white transition hover:scale-110 hover:shadow-xl focus:outline-none focus:ring active:bg-red-500"
-              >
-                Cancelar
-              </ButtonCustomer>
+            <div className='space-y-1 mt-4'>
+              <div className="flex flex-row justify-center items-center gap-2">
+                <div className="flex-1 sm:w-auto">
+                  <Button
+                    onClick={recoverPassword}
+                    className="w-full h-10 text-white inline-flex items-center justify-center gap-2 rounded border border-indigo-600 bg-indigo-600 hover:text-indigo-600 px-0 py-2.5 text-sm font-medium hover:bg-transparent focus:outline-none focus:ring"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+
+                    Recuperar Contraseña
+                  </Button>
+                </div>
+                <div className="flex-1 sm:w-auto">
+                  <CustomButton onClick={closePasswordModal} type="button"
+                    color="red"
+                    padding_x="0"
+                    padding_smx="0"
+                    padding_mdx="0"
+                    padding_y="2.5"
+                    width="full"
+                    height="10"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+
+                    Cancelar
+                  </CustomButton>
+                </div>
+              </div>
             </div>
           </form>
         </div>

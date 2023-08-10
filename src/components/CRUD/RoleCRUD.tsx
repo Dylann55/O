@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 import ModalCRUD from '../Widgets/ModalCRUD';
 import Alert from '../Widgets/Alert';
@@ -23,9 +23,10 @@ interface RoleCRUDProps {
   id: string;
   OrganizacionID: number;
   name: string;
+  handleFetchItems: () => void;
 }
 
-const RoleCRUD: React.FC<RoleCRUDProps> = ({ urls, id, OrganizacionID, name }) => {
+const RoleCRUD: React.FC<RoleCRUDProps> = ({ urls, id, OrganizacionID, name, handleFetchItems }) => {
 
   const [itemName] = useState<string>('Perfil');
 
@@ -58,13 +59,18 @@ const RoleCRUD: React.FC<RoleCRUDProps> = ({ urls, id, OrganizacionID, name }) =
           userID: id,
         }
         const response = await ReadRequest(url, config);
-
         if (!response.error && !response.errors) {
           if (response.message) {
             setMessageError(response.message);
           }
-          setItems(response.data);
-          clearCheckbox();
+          if (!response.data) {
+            setItems(response);
+            clearCheckbox();
+          }
+          else {
+            setItems(response.data);
+            clearCheckbox();
+          }
         }
       }
       else {
@@ -109,9 +115,9 @@ const RoleCRUD: React.FC<RoleCRUDProps> = ({ urls, id, OrganizacionID, name }) =
         for (const idToDelete of idsToDelete) {
           const config = {
             access_token: access_token,
-            userHasProfile: idToDelete,
+            userHasprofileID: idToDelete,
+            userHasProfile: idsToDelete,
             organizationID: OrganizacionID,
-            userID: id
           }
           const response = await DeleteRequest(url, config);
           OptionMessage(response);
@@ -156,18 +162,21 @@ const RoleCRUD: React.FC<RoleCRUDProps> = ({ urls, id, OrganizacionID, name }) =
   };
 
   const OptionMessage = (data: any): void => {
-    console.log(data)
     if (data.error) {
+      if (data.error.message) {
+        setMessageError(data.error.message)
+      }
       setMessageError(data.error);
     }
     else if (data.message) {
       if (data.message == "Perfil de usuario agregado" ||
+        data.message == "Se creo el perfil de usuario exitosamente" ||
         data.message == "Se elimino el perfil del usuario en la empresa" ||
         data.message == "se elimino el perfil exitosamente" ||
         data.message == "se eliminó el perfil exitosamente"
       ) {
         setMessageVerification(data.message);
-        fetchItems();
+        handleFetchItems();
         closeModal();
         return;
       }
@@ -181,15 +190,13 @@ const RoleCRUD: React.FC<RoleCRUDProps> = ({ urls, id, OrganizacionID, name }) =
     }
   };
 
-  // -------------------------------Funciones para la Paginacion-------------------------------
+  const clearItem = () => {
+    setProfile({
+      profileIDs: [],
+    });
+  }
 
   // -------------------------------Funciones de Extra-------------------------------
-
-  useEffect(() => {
-
-    fetchItems();
-
-  }, []);
 
   // // Variables del Componente Modal
   const [ModalOpen, setModalOpen] = useState(false);
@@ -210,11 +217,13 @@ const RoleCRUD: React.FC<RoleCRUDProps> = ({ urls, id, OrganizacionID, name }) =
   // -------------------------------Funciones para los Modal-------------------------------
   // Funciones que activa el modal para loguearse
   const openLoginModal = () => {
+    fetchItems();
     setModalOpen(true);
   };
   // Funcion que cierra el modal para loguearse
   const closeModal = () => {
     clearCheckbox();
+    clearItem();
     setModalOpen(false);
   };
 
@@ -222,21 +231,12 @@ const RoleCRUD: React.FC<RoleCRUDProps> = ({ urls, id, OrganizacionID, name }) =
   return (
     <div>
 
-      <div className="space-y-4">
-
-        {messageError && (
-          <>
-            <Alert message={messageError} onClose={closeAlert} />
-          </>
-        )}
-
-        {messageVerification && (
-          <>
-            <AlertVerification message={messageVerification} onClose={closeAlert} />
-          </>
-        )}
-
-      </div>
+      {messageError && (
+        <Alert message={messageError} onClose={closeAlert} />
+      )}
+      {messageVerification && (
+        <AlertVerification message={messageVerification} onClose={closeAlert} />
+      )}
 
       <ModalCRUD isOpen={ModalOpen}>
         <div className="mx-auto mt-4 sm:mt-6 max-w-screen items-center">
@@ -270,6 +270,10 @@ const RoleCRUD: React.FC<RoleCRUDProps> = ({ urls, id, OrganizacionID, name }) =
                   </th>
 
                   <th className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+                    Id del Rol
+                  </th>
+
+                  <th className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
                     Roles
                   </th>
 
@@ -288,6 +292,10 @@ const RoleCRUD: React.FC<RoleCRUDProps> = ({ urls, id, OrganizacionID, name }) =
                         onChange={(event) => handleCheckboxChange(event, item)}
                         checked={selectedItems.includes(item)}
                       />
+                    </td>
+
+                    <td className="whitespace-nowrap px-4 py-2 font-medium">
+                      {item.userHasProfile}
                     </td>
 
                     <td className="whitespace-nowrap px-4 py-2 font-medium">
@@ -371,7 +379,7 @@ const RoleCRUD: React.FC<RoleCRUDProps> = ({ urls, id, OrganizacionID, name }) =
 
             <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-center">
 
-              <div className="flex-1 w-80 sm:w-36">
+              <div className="flex-1 w-full sm:w-36">
                 <CustomButton type="submit"
                   color="indigo"
                   padding_x="0"
@@ -388,7 +396,7 @@ const RoleCRUD: React.FC<RoleCRUDProps> = ({ urls, id, OrganizacionID, name }) =
                 </CustomButton>
               </div>
 
-              <div className="flex-1 w-80 sm:w-36">
+              <div className="flex-1 w-full sm:w-36">
                 <CustomButton onClick={handleDeleteSelected} type="button"
                   color="red"
                   padding_x="0"
@@ -416,7 +424,7 @@ const RoleCRUD: React.FC<RoleCRUDProps> = ({ urls, id, OrganizacionID, name }) =
                 </CustomButton>
               </div>
 
-              <div className="flex-1 w-80 sm:w-36">
+              <div className="flex-1 w-full sm:w-36">
                 <CustomButton onClick={closeModal} type="button"
                   color="red"
                   padding_x="0"

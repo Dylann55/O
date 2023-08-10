@@ -82,7 +82,8 @@ class SupaBaseAuthStateSocial extends AuthStateSocial {
               email,
               id,
               name: '',
-              lastName: ''
+              lastName: '',
+              rut:'00.000.000-0'
             };
             const config = {
               method: 'POST',
@@ -91,7 +92,6 @@ class SupaBaseAuthStateSocial extends AuthStateSocial {
               },
             };
             const data = await fetchDataWithConfig(url, config);
-            console.log(data);
           }
           window.location.href = '/Organization/MyOrganizations';
         }

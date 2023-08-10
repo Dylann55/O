@@ -37,6 +37,21 @@ export const CreateRequest = async (url: string, newItem: any): Promise<any> => 
     return response;
 };
 
+//Funcion generica para subir Archivos 
+export const CreateRequestFile = async (url: string, newItem: any, formData: any): Promise<any> => {
+
+    const token = generateToken(newItem);
+    const config = {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+    };
+    const response = await fetchDataWithConfig(url, config);
+    return response;
+};
+
 // Función genérica para realizar una solicitud PUT
 export const UpdateRequest = async (url: string, newItem: any): Promise<any> => {
     const token = generateToken(newItem);

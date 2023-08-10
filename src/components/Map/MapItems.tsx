@@ -1,20 +1,37 @@
-import { LoadScript, GoogleMap, Marker } from '@react-google-maps/api';
+import { GoogleMap, Marker } from '@react-google-maps/api';
 import React from 'react';
 
 interface RouteData {
-    name: string;
-    description: string;
-    name1: string;
+    id: number;
+    Name: string;
+    UbicationI: string;
     latitude1: number | null;
     longitude1: number | null;
-    name2: string;
+    UbicationF: string;
     latitude2: number | null;
     longitude2: number | null;
+
+    vehicleHasTripID: number;
+    vehicleID: number;
+    tripID: number;
+    userHasprofileID: number;
+    dateAssignment: Date;
+    typeBurdenID: number;
+    status: string;
+    dateAssignmentF: Date;
+
+    userID: number;
+    profileID: number;
+    weight: number;
+    typeBurden: string;
+    patent: string;
+    mark: string;
+    model: string;
 }
 
 interface MapItemsProps {
     items: RouteData[];
-    selectedRoutes: number[]; // Add the selectedRoutes prop
+    selectedRoutes: RouteData[]; // Add the selectedRoutes prop
 }
 
 const MapItems: React.FC<MapItemsProps> = ({ items, selectedRoutes }) => {
@@ -23,44 +40,44 @@ const MapItems: React.FC<MapItemsProps> = ({ items, selectedRoutes }) => {
         lat: items[0]?.latitude1 || 0,
         lng: items[0]?.longitude1 || 0,
     };
-
-    const filteredItems = items.filter((_, index) => selectedRoutes.includes(index));
+    const filteredItems = items.filter((item) => selectedRoutes.some((selectedItem) => selectedItem.id === item.id));
 
     return (
-        <div style={{ width: '500px', height: '400px', border: '1px solid black' }}>
-            <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}>
-                <GoogleMap mapContainerStyle={{ width: '500px', height: '400px' }} center={center} zoom={2}>
-                    {filteredItems.map((item, index) => (
-                        <React.Fragment key={index}>
-                            <Marker
-                                position={{
-                                    lat: item.latitude1 || 0,
-                                    lng: item.longitude1 || 0,
-                                }}
-                                title={item.name1}
-                                icon={{
-                                    url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-                                    scaledSize: new window.google.maps.Size(30, 30),
-                                }}
-                            />
 
-                                
+        <div className="h-64 md:h-96">
+            <GoogleMap
+                mapContainerStyle={{ width: '100%', height: '100%' }}
+                center={center} zoom={2}>
+                {filteredItems.map((item, index) => (
+                    <React.Fragment key={index}>
+                        <Marker
+                            position={{
+                                lat: item.latitude1 || 0,
+                                lng: item.longitude1 || 0,
+                            }}
+                            title={item.UbicationI}
+                            icon={{
+                                url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
+                                scaledSize: new window.google.maps.Size(30, 30),
+                            }}
+                        />
 
-                            <Marker
-                                position={{
-                                    lat: item.latitude2 || 0,
-                                    lng: item.longitude2 || 0,
-                                }}
-                                title={item.name2}
-                                icon={{
-                                    url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-                                    scaledSize: new window.google.maps.Size(30, 30),
-                                }}
-                            />
-                        </React.Fragment>
-                    ))}
-                </GoogleMap>
-            </LoadScript>
+
+
+                        <Marker
+                            position={{
+                                lat: item.latitude2 || 0,
+                                lng: item.longitude2 || 0,
+                            }}
+                            title={item.UbicationF}
+                            icon={{
+                                url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
+                                scaledSize: new window.google.maps.Size(30, 30),
+                            }}
+                        />
+                    </React.Fragment>
+                ))}
+            </GoogleMap>
         </div>
     );
 };

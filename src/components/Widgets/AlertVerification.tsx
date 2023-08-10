@@ -12,7 +12,7 @@ const AlertVerification: React.FC<AlertVerificationProps> = ({
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
-    }, 70000);
+    }, 7000);
 
     return () => clearTimeout(timer);
   }, [onClose]);
@@ -23,7 +23,7 @@ const AlertVerification: React.FC<AlertVerificationProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
+      className="fixed inset-0 z-50"
       onClick={handleContainerClick}
     >
       <div
@@ -50,12 +50,11 @@ const AlertVerification: React.FC<AlertVerificationProps> = ({
           </span>
 
           <div className="flex-1">
-            <strong className="block font-medium font-bold">
-              {' '}
-              Mensaje de Verificacion{' '}
+            <strong className="block font-medium font-bold text-xs sm:text-sm">
+              Mensaje de Verificacion
             </strong>
 
-            <p className="mt-1 text-sm">{message}</p>
+            <p className="mt-1 text-xs sm:text-sm">{message}</p>
           </div>
         </div>
       </div>

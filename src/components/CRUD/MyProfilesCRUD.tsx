@@ -7,6 +7,9 @@ import { ReadRequest } from '@/utils/CRUD';
 import { getSession } from '@/utils/LocalStorage';
 import Link from 'next/link';
 import CustomButton from '../Widgets/Button/CustomButton';
+import PaginationButtons from './PaginationButtons';
+import SearchComponent from '../Search/SearchComponent';
+import { filterItems, sortItems } from '@/utils/SearchFilter';
 
 interface Item {
     userHasProfile: number;
@@ -51,6 +54,7 @@ const MyProfilesCRUD: React.FC<MyProfilesCRUDProps> = ({ urls, title, subtitle, 
                 }
 
                 const response = await ReadRequest(url, config);
+                console.log(response);
                 if (!response.error) {
                     if (!response.message) {
                         setItems(response);
@@ -78,10 +82,10 @@ const MyProfilesCRUD: React.FC<MyProfilesCRUDProps> = ({ urls, title, subtitle, 
         const endIndex = startIndex + ITEMS_PER_PAGE;
 
         // Filtrar y ordenar los elementos según el término de búsqueda y el tipo de búsqueda seleccionado
-        const filteredItems = filterItems(items);
+        const filteredItems = filterItems(items, searchTerm, searchType);
 
         // Ordenar los elementos según la dirección de ordenamiento y la propiedad seleccionada
-        const sortedItems = sortItems(filteredItems);
+        const sortedItems = sortItems(filteredItems, sortProperty, sortDirection);
 
         return sortedItems.slice(startIndex, endIndex);
     };
@@ -102,46 +106,6 @@ const MyProfilesCRUD: React.FC<MyProfilesCRUDProps> = ({ urls, title, subtitle, 
         setSortProperty(property);
     };
 
-    // Filtrar y ordenar los elementos según el término de búsqueda y el tipo de búsqueda seleccionado
-    const filterItems = (items: Item[]) => {
-        if (!items) {
-            return [];
-        }
-
-        return items.filter((item) => {
-            const propValue = item[searchType];
-
-            if (propValue !== undefined && typeof propValue === 'string') {
-                return propValue.toLowerCase().includes(searchTerm.toLowerCase());
-            }
-
-            if (propValue !== undefined && typeof propValue === 'number') {
-                return propValue.toString().includes(searchTerm);
-            }
-
-            return false;
-        });
-    }
-
-    // Ordenar los elementos según la dirección de ordenamiento y la propiedad seleccionada
-    const sortItems = (items: Item[]) => {
-        return items.sort((a, b) => {
-            const propA = a[sortProperty];
-            const propB = b[sortProperty];
-
-            if (propA !== undefined && propB !== undefined) {
-                if (typeof propA === 'string' && typeof propB === 'string') {
-                    return sortDirection === 'asc' ? propA.localeCompare(propB) : propB.localeCompare(propA);
-                }
-
-                if (typeof propA === 'number' && typeof propB === 'number') {
-                    return sortDirection === 'asc' ? propA - propB : propB - propA;
-                }
-            }
-
-            return 0;
-        });
-    }
     const handlePrevPage = () => {
         setCurrentPage(prevPage => prevPage - 1);
     };
@@ -184,26 +148,16 @@ const MyProfilesCRUD: React.FC<MyProfilesCRUDProps> = ({ urls, title, subtitle, 
     return (
         <div>
 
-            <div className="space-y-4">
-
-                {messageError && (
-                    <>
-                        <Alert message={messageError} onClose={closeAlert} />
-                    </>
-                )}
-
-                {messageVerification && (
-                    <>
-                        <AlertVerification message={messageVerification} onClose={closeAlert} />
-                    </>
-                )}
-
-            </div>
+            {messageError && (
+                <Alert message={messageError} onClose={closeAlert} />
+            )}
+            {messageVerification && (
+                <AlertVerification message={messageVerification} onClose={closeAlert} />
+            )}
 
             <div className='min-h-screen mx-6 my-2'>
 
                 <div className="flex flex-col items-center gap-2 md:flex-row md:justify-between mb-4">
-
                     <div className='text-center md:text-start'>
                         <h1 className="text-2xl sm:text-3xl font-semibold leading-relaxed text-gray-900">
                             {title}
@@ -212,60 +166,22 @@ const MyProfilesCRUD: React.FC<MyProfilesCRUDProps> = ({ urls, title, subtitle, 
                             {subtitle}
                         </p>
                     </div>
-
                 </div>
 
-                <div className='flex flex-col items-center gap-2 sm:flex-row'>
-
-                    <div className='flex-1 w-full sm:w-auto'>
-                        <div className="relative z-1">
-                            <label htmlFor="Search" className="sr-only">
-                                Search
-                            </label>
-
-                            <input
-                                type="text"
-                                placeholder="Buscar..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full rounded-md border-gray-200 py-2.5 pl-10 pr-3 shadow-sm sm:text-sm"
-                            />
-
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                strokeWidth="1.5"
-                                stroke="currentColor"
-                                className="h-4 w-4 absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-                                />
-                            </svg>
-                        </div>
-                    </div>
-
-
-                    <div className='flex-2 w-full sm:w-auto'>
-                        <select
-                            className="h-12 w-full rounded-lg border-gray-300 text-gray-700 text-sm"
-                            value={searchType}
-                            onChange={(e) => setSearchType(e.target.value as
-                                'organizationID' | 'organizationname'
-                            )}
-                        >
-                            <option value="organizationID">ID de la Organizacion</option>
-                            <option value="organizationname">Nombre de la Organizacion</option>
-                        </select>
-                    </div>
-
-                </div>
+                <SearchComponent searchTerm={searchTerm} setSearchTerm={setSearchTerm}>
+                    <select
+                        className="h-12 w-full rounded-lg border-gray-300 text-gray-700 text-sm"
+                        value={searchType}
+                        onChange={(e) => setSearchType(e.target.value as
+                            'organizationID' | 'organizationname'
+                        )}
+                    >
+                        <option value="organizationID">ID de la Organizacion</option>
+                        <option value="organizationname">Nombre de la Organizacion</option>
+                    </select>
+                </SearchComponent>
 
                 <div className="overflow-x-auto">
-
                     <table className="min-w-full divide-y-2 divide-gray-200 bg-white text-sm mt-4">
 
                         <thead>
@@ -411,60 +327,10 @@ const MyProfilesCRUD: React.FC<MyProfilesCRUDProps> = ({ urls, title, subtitle, 
                         </tbody>
 
                     </table>
-
                 </div>
 
-                {/* Pagination controls */}
-                <div className="flex item-center justify-center gap-1 mt-2">
-
-                    <button onClick={handlePrevPage}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100 bg-white text-gray-900 rtl:rotate-180"
-                        disabled={currentPage === 1}
-                    >
-                        <span className="sr-only">Prev Page</span>
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-3 w-3"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                        >
-                            <path
-                                fillRule="evenodd"
-                                d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                                clipRule="evenodd"
-                            />
-                        </svg>
-                    </button>
-
-                    <div>
-                        <span className="block h-8 w-8 rounded border border-gray-100 bg-white text-center leading-8 text-gray-900">
-                            {currentPage}
-                        </span>
-                    </div>
-
-                    <button onClick={handleNextPage}
-                        disabled={currentPage === totalPages}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded border border-gray-100 bg-white text-gray-900 rtl:rotate-180"
-                    >
-                        <span className="sr-only">Next Page</span>
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-3 w-3"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                        >
-                            <path
-                                fillRule="evenodd"
-                                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                clipRule="evenodd"
-                            />
-                        </svg>
-                    </button>
-
-                </div>
-
+                <PaginationButtons currentPage={currentPage} totalPages={totalPages} handlePrevPage={handlePrevPage} handleNextPage={handleNextPage} />
             </div>
-
         </div>
     );
 };

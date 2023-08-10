@@ -5,10 +5,10 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/Button';
 import Alert from '@/components/Widgets/Alert';
 import AlertVerification from '@/components/Widgets/AlertVerification';
-import ButtonCustomer from '@/components/Widgets/ButtonCustomer';
-import Modal from '@/components/Widgets/Modal';
 import { AuthState, UpdatePassword } from '@/utils/DBFuntion';
 import { isPasswordValid } from '@/utils/VerifyUser';
+import CustomButton from '@/components/Widgets/Button/CustomButton';
+import ModalPassword from '@/components/Widgets/ModalPassword';
 
 const ResetPassword = () => {
   // Inicializo un clase para las funciones de la base de datos
@@ -86,11 +86,11 @@ const ResetPassword = () => {
         </>
       )}
 
-      <Modal isOpen={passwordModalOpen}>
-        <div className="mx-auto mt-20 max-w-screen-sm items-center gap-1 px-0 py-2 sm:mt-5">
+      <ModalPassword isOpen={passwordModalOpen}>
+        <div className="mx-auto max-w-screen-sm items-center gap-1 px-0 py-2 sm:mt-5">
           <form
             onSubmit={ChangePassword}
-            className="mb-0 mt-1 space-y-4 rounded-lg p-4 sm:p-6 lg:p-8"
+            className="space-y-4 rounded-lg p-4 sm:p-6 lg:p-8"
           >
             <div className="mx-auto max-w-lg text-center">
               <h1 className="text-2xl font-bold sm:text-3xl">
@@ -159,23 +159,42 @@ const ResetPassword = () => {
               </span>
             </div>
 
-            <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-center">
-              <Button
-                onClick={ChangePassword}
-                className="inline-block rounded bg-indigo-600 px-9 py-3 text-sm font-medium text-white transition hover:scale-110 hover:shadow-xl focus:outline-none focus:ring active:bg-indigo-500 sm:px-8"
-              >
-                Cambiar contraseña
-              </Button>
-              <ButtonCustomer
-                onClick={closePasswordModal}
-                className="inline-block rounded bg-indigo-600 px-20 py-3 text-sm font-medium text-white transition hover:scale-110 hover:shadow-xl focus:outline-none focus:ring active:bg-indigo-500"
-              >
-                Volver
-              </ButtonCustomer>
+            <div className='space-y-1 mt-4'>
+              <div className="flex flex-row justify-center items-center gap-2">
+                <div className="flex-1 sm:w-auto">
+                  <Button
+                    onClick={ChangePassword}
+                    className="w-full h-10 text-white inline-flex items-center justify-center gap-2 rounded border border-indigo-600 bg-indigo-600 hover:text-indigo-600 px-0 py-2.5 text-sm font-medium hover:bg-transparent focus:outline-none focus:ring"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+
+                    Cambiar contraseña
+                  </Button>
+                </div>
+                <div className="flex-1 sm:w-auto">
+                  <CustomButton onClick={closePasswordModal} type="button"
+                    color="indigo"
+                    padding_x="0"
+                    padding_smx="0"
+                    padding_mdx="0"
+                    padding_y="2.5"
+                    width="full"
+                    height="10"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+
+                    Volver
+                  </CustomButton>
+                </div>
+              </div>
             </div>
           </form>
         </div>
-      </Modal>
+      </ModalPassword>
     </>
   );
 };

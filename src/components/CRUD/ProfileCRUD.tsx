@@ -7,12 +7,14 @@ import { generateToken } from '@/utils/Jwt';
 import { fetchDataWithConfig } from '@/utils/Fetch';
 import { ReadRequest, UpdateRequest } from '@/utils/CRUD';
 import CustomButton from '../Widgets/Button/CustomButton';
+import TextInput from '../Widgets/Imput/TextInput';
 
 interface Item {
   id: number;
   name: string;
   email: string;
   lastName: string;
+  rut: string;
 }
 
 const url_item = process.env.NEXT_PUBLIC_MIDDLE_URL;
@@ -26,7 +28,8 @@ const ProfileCRUD: React.FC = () => {
     id: 0,
     name: '',
     email: '',
-    lastName: ''
+    lastName: '',
+    rut: ''
   });
 
   const isItemsEmpty = items.length === 0;
@@ -44,7 +47,11 @@ const ProfileCRUD: React.FC = () => {
           access_token: access_token,
         }
         const response = await ReadRequest(url, config);
-        setItems([response]);
+        if (!response.error && !response.errors) {
+          if (!response.message) {
+            setItems([response]);
+          }
+        }
       }
       else {
         setMessageError("Expiro la Session")
@@ -65,6 +72,7 @@ const ProfileCRUD: React.FC = () => {
         const config = {
           name: newItem.name,
           lastName: newItem.lastName,
+          rut: newItem.rut,
           access_token: access_token,
         }
 
@@ -86,6 +94,7 @@ const ProfileCRUD: React.FC = () => {
       name: '',
       email: '',
       lastName: '',
+      rut: ''
     });
   }
 
@@ -94,7 +103,7 @@ const ProfileCRUD: React.FC = () => {
       setMessageError(data.error);
     }
     else if (data.message) {
-      if (data.message == "El name y lastName del usuario se han actualizado con exito") {
+      if (data.message == "Datos de usuario se han actualizado con exito") {
         setMessageVerification(data.message);
         closeModal();
         fetchItems();
@@ -111,6 +120,18 @@ const ProfileCRUD: React.FC = () => {
       setMessageError('Error Inesperado');
     }
   };
+
+  const handleEdit = (item: Item) => {
+    setNewItem({
+      id: item.id,
+      name: item.name,
+      email: item.email,
+      lastName: item.lastName,
+      rut: item.rut
+    });
+    openLoginModal();
+  };
+
   // -------------------------------Funciones de Extra-------------------------------
   const changePassword = async () => {
 
@@ -201,7 +222,7 @@ const ProfileCRUD: React.FC = () => {
             </svg>
 
             <span style={{ pointerEvents: "none" }}
-              className={`translate-x-16 absolute start-full top-1/2 -translate-y-1/2  rounded bg-gray-900 px-2 py-1.5 text-xs font-medium text-white opacity-0 group-hover:opacity-100`}>
+              className="absolute w-24 text-center top-1/2 ms-4 -translate-y-1/2 translate-x-3/4 ml-6 rounded bg-gray-900 py-1.5 text-xs font-medium text-white opacity-0 group-hover:opacity-100">
               Perfil
             </span>
           </button>
@@ -240,16 +261,20 @@ const ProfileCRUD: React.FC = () => {
                         </div>
 
                         <p className="mt-1 text-sm font-medium text-gray-900 dark:text-white">
+                          {item.rut}
+                        </p>
+                        <p className="text-sm text-gray-900 dark:text-white">
                           {item.name} {item.lastName}
                         </p>
-                        <p className="mt-0 text-sm text-gray-900 dark:text-white">
+                        <p className="text-sm text-gray-900 dark:text-white">
                           {item.email}
                         </p>
                       </div>
                     </div>
 
                     <div className='flex justify-center m-1'>
-                      <CustomButton onClick={openLoginModal}
+                      
+                      <CustomButton onClick={() => handleEdit(item)}
                         type="button"
                         color="indigo"
                         padding_x="4"
@@ -285,7 +310,7 @@ const ProfileCRUD: React.FC = () => {
 
             {ModalOpen && (
               <div className="ml-3 absolute start-full top-1/2 -translate-y-1/4 translate-x-12 mt-2 w-80 py-1 bg-white border border-gray-100 rounded-lg shadow-lg dark:bg-neutral-900 dark:border-gray-600">
-                <form onSubmit={handleUpdate} className="space-y-4 rounded-lg p-2 sm:p-4 lg:p-6">
+                <form onSubmit={handleUpdate} className="space-y-1 sm:space-y-2 mb-0 rounded-lg p-4">
 
                   <div className="mx-auto max-w-lg text-center">
                     <h1 className="text-gray-300 text-2xl font-bold">
@@ -299,60 +324,24 @@ const ProfileCRUD: React.FC = () => {
                     </p>
                   </div>
 
-                  <div className="relative flex items-center">
-                    <input
-                      type="text"
-                      id="name"
-                      value={newItem.name || ''}
+                  <div className='space-y-2'>
+                    <TextInput
+                      value={newItem.rut}
+                      onChange={(e) => setNewItem({ ...newItem, rut: e.target.value })}
+                      placeholder="Ingresar Rut"
+                    />
+
+                    <TextInput
+                      value={newItem.name}
                       onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-                      className="w-full rounded-lg border-gray-200 p-4 text-sm shadow-sm"
                       placeholder="Ingresar Nombre"
                     />
 
-                    <span className="absolute inset-y-0 right-0 flex items-center pr-4">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4 text-gray-400"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
-                        />
-                      </svg>
-                    </span>
-                  </div>
-
-                  <div className="relative flex items-center">
-                    <input
-                      type="text"
-                      id="lastName"
-                      value={newItem.lastName || ''}
+                    <TextInput
+                      value={newItem.lastName}
                       onChange={(e) => setNewItem({ ...newItem, lastName: e.target.value })}
-                      className="w-full rounded-lg border-gray-200 p-4 text-sm shadow-sm"
                       placeholder="Ingresar Apellido"
                     />
-
-                    <span className="absolute inset-y-0 right-0 flex items-center pr-4">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4 text-gray-400"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
-                        />
-                      </svg>
-                    </span>
                   </div>
 
                   <div className="flex items-center justify-center">
@@ -381,7 +370,7 @@ const ProfileCRUD: React.FC = () => {
                     </CustomButton>
                   </div>
 
-                  <div className="flex items-center gap-2 sm:flex-row sm:justify-center">
+                  <div className="flex items-center gap-1 sm:gap-2 sm:flex-row sm:justify-center">
 
                     <div className="flex-1">
                       <CustomButton type="submit"
